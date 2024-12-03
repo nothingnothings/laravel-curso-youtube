@@ -1,0 +1,75 @@
+
+
+
+
+
+
+
+
+--> ACESSAMOS AS PAGES DE NOSSO PROJETO POR MEIO DE __ ROTAS_...
+
+
+
+--> AS ROTAS CHAMAM AS VIEWS,
+
+    QUE SÃO AS REPRESENTAÇÕES GRÁFICAS DAS PÁGINAS 
+
+
+
+
+--> NAS VIEWS TEREMOS OS TEMPLATES, ONDE HÁ A ESTRUTURAÇÃO 
+    DA PÁGINA, POR MEIO DO HTML....
+
+
+
+
+
+--> OS TEMPLATES TAMBÉM RENDERIZAM __ DADOS DINÂMICOS,
+    POR MEIO DO PHP... 
+
+
+
+
+
+
+
+
+
+
+
+CRIO 1 NOVO PROJETO,
+
+
+
+COM laravel new example_project 
+
+
+
+
+
+
+
+
+
+
+
+
+ACESSAMOS AS ROUTES, EM 'routes>web.php'...
+
+
+
+
+
+
+
+TEMOS NOSSAS ROUTES:
+
+
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return view('welcome');
+});

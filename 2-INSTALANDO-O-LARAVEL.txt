@@ -1,0 +1,78 @@
+
+
+
+
+
+
+
+
+LARAVEL:
+
+
+
+
+
+
+
+
+1) FRAMEWORK CONSTRUÍDO COM PHP 
+
+
+
+2) UTILIZA ARQUITETURA MVC 
+
+
+
+3) RECURSOS MT INTERESSANTES QUE AUXILIAM O DESENVOLVIMENTO DE APPS,
+    COMO artisan, migrations, blade, etc...
+
+
+
+
+
+4) FÁCIL DE CRIAR CÓDIGO, NÃO É TÃO BUROCRÁTICO,
+
+ACELERA DESENVOLVIMENTO DOS APPS...
+
+
+
+
+
+
+
+
+5) A ESTRUTURA DE PASTAS É SIMPLES, DEIXANDO O PROJETO ORGANIZADO...
+
+
+
+
+
+
+A VERSÃO DO LARAVEL DO PROFESSOR É MAIS ANTIGA,
+VERSÃO 10...
+
+
+
+
+
+
+
+
+
+
+
+
+php artisan serve ---->
+
+
+
+
+
+
+
+'serve' faz com que seu app seja servido...
+
+
+
+
+--> isso LOCALMENTE...

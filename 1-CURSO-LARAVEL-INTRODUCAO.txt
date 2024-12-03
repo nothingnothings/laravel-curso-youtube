@@ -1,0 +1,85 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> TEMOS 1 BARRA DE PESQUISA, EM QUE PODEMOS PESQUISAR 
+    OBJETOS CADASTRADOS NO SISTEMA...
+
+
+
+
+
+
+
+
+
+
+--> ROUTES DE 'SHOW',   
+    para ver os detalhes de cada object...
+
+
+
+
+
+
+
+
+-> VEREMOS RELATIONS MANY-TO-MANY,
+
+    ONE-TO-MANY,
+
+
+    NO ELOQUENT...
+
+
+
+
+
+
+
+--> upload de images,
+
+    upload de dados em array...
+
+
+
+
+--> proteção de rota, com jetstream...
+
+
+
+
+
+
+
+--> dashboard...
+
+
+
+
+
+
+
+
+
+
+--> eventos que crio, eventos que participo...
+
+
+
+
+
+
+
+
+-> inserir dados, deletar dados, etc etc...
