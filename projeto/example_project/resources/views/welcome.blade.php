@@ -1,4 +1,8 @@
-@extends('layout')
+@extends('layouts.main')
+
+@section('title', 'HDC Events')
+
+@section('content')
 <body>
     <h1>Algum título</h1>
     @if($nome === "Arthur") {
@@ -36,3 +40,4 @@
             <img src="/img/banner.jpg" alt="Laravel">
 </body>
 </html>
+@endsection

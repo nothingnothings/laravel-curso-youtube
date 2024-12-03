@@ -86,3 +86,559 @@ E ASSIM:
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> A FUNCIONALIDADE DE CRIAR LAYOUTS PERMITE O REAPROVEITAMENTO DE CÓDIGO...
+
+
+
+
+
+
+
+
+
+-> POR EXEMPLO, PODEMOS UTILIZAR O MESMO HEADER E FOOTER EM TODAS 
+AS PÁGINAS,
+ SEM REUTILIZAR CÓDIGO...
+
+
+
+
+
+
+
+
+
+--> MAS O LAYOUT DO BLADE NÃO SE LIMITA A ISSO, 
+PODEMOS CRIAR SEÇÕES DO SITE POR MEIO DO LAYOUT E TAMBÉM MUDAR O TITLE 
+
+DA PÁGINA...
+
+
+
+
+
+
+--> É BOM CRIAR 1 FOLDER SEPARADO PARA OS LAYOUts,
+
+DE nome 'layouts'... 
+
+
+
+
+
+
+
+
+
+
+
+
+
+DENTRO DESSE FOLDER, TEREMOS 1 ARQUIVO DE NOME 'main.blade.php',
+
+
+QUE SERÁ NOSSO ARQUIVO DE LAYOUT PRINCIPAL...
+
+
+
+
+
+
+
+
+
+
+
+O FORMATO DE 'main.blade.php'
+
+
+FICA ASSIM:
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Laravel</title>
+
+    <!-- Styles / Scripts -->
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+    @endif
+
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/app.js"></script>
+</head>
+<body>
+    @yield('content');
+
+    <footer>
+        <p>HDC Events &copy; 2024</p>
+    </footer>
+</body>
+
+
+
+
+
+
+
+
+
+
+OU SEJA, TODAS AS PÁGINAS TERÃO ESSE LAYOUT,
+
+
+COM ESSES ARQUIVOS ESTÁTICOS,
+
+
+
+
+
+A ÚNICA COISA QUE SERÁ REALMENTE INSERIDA SERÁ A PARTE DE '@yield('content');'
+
+
+
+
+
+
+
+
+
+
+
+FAZEMOS A MESMA COISA NA TAG DE '<title>',
+
+
+colocamos um '@yield('title' )',
+
+
+PARA QUE TENHAMOS 
+
+
+UMA SEÇÃO QUE VAI MUDAR O TÍTULO DA PÁGINA, DINAMICAMENTE...
+
+
+
+
+
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>@yield('title')</title>
+
+    <!-- Styles / Scripts -->
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+    @endif
+
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/app.js"></script>
+</head>
+<body>
+    @yield('content');
+
+    <footer>
+        <p>HDC Events &copy; 2024</p>
+    </footer>
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MAS COMO PODEMOS INSERIR DADOS NESSES SLOTS,
+
+LÁ NAS NOSSAS VIEWS?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> lá em welcome,
+podemos escrever assim:
+
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events')
+
+@section('content')
+<body>
+    <h1>Algum título</h1>
+    @if($nome === "Arthur") {
+    <p>{{ $nome }}</p>
+    }
+    @elseif($nome === "Pedro") {
+    <p>O nome é outro </p>
+    }
+    @else {
+    <p>O nome é ainda outro</p>
+    }
+    @endif
+
+
+    @for ($i = 0; $i < count($someArray); $i++) {{-- <p>{{ $someArray[$i] }}</p> --}}
+        @if($someArray[$i] === 2) {
+        <p>O valor é igual a 3</p>
+        }
+        @endif
+        @endfor
+
+        @php
+        $name2 = "Pedro";
+        echo $name2;
+
+        @endphp
+        {{-- COMENTÁRIO DO BLADE, QUE NÃO APARECE NO HTML FINAL --}}
+
+
+        @foreach($someNames as $name)
+        <p>{{ $loop->index }}/p>
+            <p>{{ $name }}</p>
+            @endforeach
+
+            <img src="/img/banner.jpg" alt="Laravel">
+</body>
+</html>
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OU SEJA,
+
+
+
+TEMOS:
+
+
+
+
+
+1) o extend do arquivo 'main.blade.php', que está existindo no folder de 'layouts'...
+
+
+
+2) o WRITE do title de 'HDC Events', no slot do 'title', que temos lá em 'main.blade.php'...
+
+
+
+
+3) O WRITE da section de 'content', quase como um 'props.children' lá no 'main.blade.php'...
+
+
+
+
+4) um uso de '@endsection', PARA TERMINAR A PARTE QUE É INSERIDA DENTRO DAQUELE LAYOUT, dentro do @yield de 'content'... (@yield('content')...)...
+
+
+
+
+
+
+
+
+
+
+
+CERTO... FAZ SENTIDO... É MEIO CONFUSO,
+
+MAS FAZ SENTIDO...
+
+
+
+
+
+
+
+
+
+
+-> PODEMOS FAZER A MESMA COISA COM A PÁGINA DE PRODUCTS,
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events - Produtos')
+
+@section('content')
+
+<h1>Tela de Produtos</h1>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+
+
+ATÉ AÍ, TUDO BEM...
+
+
+
+
+
+
+
+
+
+FICAMOS COM O CONTEÚDO DESSE BLADE TEMPLATE, 'products.blade.php',
+
+    INSERIDO DENTRO DO LAYOUT 'main.blade.php',
+
+    da pasta 'layouts'...
+
+
+
+
+
+
+
+
+
+
+
+
+agora vamos fazer algumas configurações do projeto final....
+
+
+
+
+
+
+
+
+
+
+vamos colocar:
+
+
+
+1) a font do projeto (google fonts)
+
+
+
+
+2) bootstrap...
+
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Fonte do Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto" rel="stylesheet">
+    <title>@yield('title')</title>
+
+    <!-- CSS Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <!-- Styles / Scripts -->
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+    @endif
+
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/app.js"></script>
+</head>
+<body>
+    @yield('content');
+
+    <footer>
+        <p>HDC Events &copy; 2024</p>
+    </footer>
+</body>
+
+
+
+
+
+
+
+
+
+
+AÍ COLOCAMOS UM STYLE GERAL,
+
+
+DE font-family: 'Roboto',
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+* {
+    font-family: "Roboto", sans-serif;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+DEVEMOS CRIAR O LAYOUT A VIEW DE CONTACT.BLADE.PHP...
+
+
+
+
+
+
+
+
+FICA TIPO ASSIM:
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events - Contato')
+
+@section('content')
+<h1>Tela de Contato</h1>
+@endsection
