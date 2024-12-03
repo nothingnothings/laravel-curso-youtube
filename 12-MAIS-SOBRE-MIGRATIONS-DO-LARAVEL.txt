@@ -1,0 +1,660 @@
+
+
+
+
+
+-> QUANDO PRECISAMOS ADICIONAR UM NOVO CAMPO A UMA TABLE,
+    DEVEMOS CRIAR UMA NOVA MIGRATION 
+
+
+
+
+--> PORÉM, DEVEMOS TOMAR CUIDADO PARA NÃO RODAR O COMANDO 
+
+':fresh',
+
+pq ele SEMPRE APAGA OS DADOS JÁ EXISTENTES..
+
+
+
+
+
+
+-> o comando 'rollback' PODE SER UTILIZADO PARA __ VOLTAR 
+
+1 MIGRATION, SE VC ESPECIFICAR A QUE MIGRATION VC QUER VOLTAR...
+
+
+
+
+
+
+
+-> PARA VOLTAR TODAS AS MIGRATIONS (e perder dados),
+    podemos usar o 'migrate:reset'...
+
+
+
+
+
+
+
+
+
+-> PARA VOLTAR TODAS AS MIGRATIONS E RODAR O MIGRATE NOVAMENTE,
+    UTILIZAMOS O 'refresh'...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> NUNCA RODE 'migrate:fresh'
+
+
+    EM PRODUÇÃO...
+
+
+
+
+
+
+
+--> PARA ADICIONAR 1 NOVO CAMPO EM ALGUMA TABLE,
+
+VC DEVE:
+
+1) CRIAR UMA NOVA MIGRATION, COM A ALTERAÇÃO DO FIELD 
+
+
+2) RODAR APENAS ESSA MIGRATION, INCREMENTAL...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> EM PRODUÇÃO, DEVEMOS TER UM 'TRATAMENTO MAIS CIRÚRGICO',
+
+SABER 'EXATAMENTE ONDE ESTAMOS COM O BANCO',
+
+E SABER 'COMO ESTAMOS COM O BANCO',
+
+usando 
+
+
+pesadamente o 
+
+
+
+'migrate:status'...
+
+
+
+
+
+'migrate:reset' --> ELE DESFAZ TUDO,
+
+                    VAI DELETANDO AS TABLES, CAMPOS QUE ADICIONAMOS,
+                    ETC...
+
+
+
+
+
+
+
+
+
+    
+'migrate:refresh' --> vai rodar todas as migrations novamente...
+
+
+
+
+
+
+
+
+
+-> DEVEMOS VER ISSO NO EDITOR...
+
+
+
+
+
+
+
+
+-> DIGAMOS QUE QUEREMOS ADICIONAR 1 NOVO CAMPO,
+
+
+TALVEZ 'category',
+na nossa table de 'products'...
+
+
+
+
+
+
+
+-> PODEMOS FAZER TIPO ASSIM:
+
+
+
+
+
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> php artisan make:migration add_category_to_products_table
+
+   INFO  Migration [C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project\database\migrations/2024_12_03_223520_add_category_to_products_table.php] created successfully.  
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+COMO VC PODE PERCEBER,
+
+O CÓDIGO DA NOSSA MIGRATION FICOU DIFERENTE...
+
+
+
+
+
+POR CONTA DO NAMING DE NOSSA MIGRATION,
+
+
+
+A FUNCTION DA MIGRATION FICOU ASSIM:
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('products', function (Blueprint $table) {
+            //
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('products', function (Blueprint $table) {
+            //
+        });
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+OU SEJA,
+
+AGORA FICAMOS COM 
+
+
+
+
+
+'Schema::table('products')',
+
+
+
+em vez de 
+
+
+
+'Schema::create('products')',
+
+
+
+como tínhamos na migration anterior...
+
+
+
+
+ex:
+
+
+
+
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 100);
+            $table->integer('qty');
+            $table->text('description');
+            $table->timestamps();
+        });
+
+
+
+
+
+
+
+-> PODEMOS ADICIONAR NOVOS FIELDS LIVREMENTE, TIPO ASSIM:
+
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('products', function (Blueprint $table) {
+            $table->string('category', 100)->after('description');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('products', function (Blueprint $table) {
+            //
+        });
+    }
+};
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+MAS É CLARO QUE, MAIS PARA BAIXO,
+
+EM 'down()',
+
+DEVEMOS FAZER O DROP DESSA COLUMN...
+
+
+
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('products', function (Blueprint $table) {
+            $table->string('category', 100)->after('description');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('products', function (Blueprint $table) {
+            $table->dropColumn('category');
+        });
+    }
+};
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+
+SE RODAMOS 
+
+
+php artisan migrate,
+
+
+
+ESSA ÚLTIMA MIGRATION SERÁ RODADA,
+
+
+E A COLUMN DE 'category'
+
+SERÁ ADICIONADA...
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> php artisan migrate
+
+   INFO  Running migrations.  
+
+  2024_12_03_223520_add_category_to_products_table ................ 52.83ms DONE
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project>  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OK... MAS AGORA PODEMOS FAZER 
+
+
+
+
+php artisan migrate:rollback 
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> php artisan migrate:rollback
+
+   INFO  Rolling back migrations.
+
+  2024_12_03_223520_add_category_to_products_table ................ 52.38ms DONE
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project>
+
+
+
+
+
+
+
+
+
+
+
+
+COM ISSO, VAMOS ROLLBACK EXATAMENTE 1 
+
+MIGRATION PARA TRÁS...
+
+
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> php artisan migrate:status
+
+  Migration name ................................................ Batch / Status  
+  0001_01_01_000000_create_users_table ................................. [1] Ran  
+  0001_01_01_000001_create_cache_table ................................. [1] Ran  
+  0001_01_01_000002_create_jobs_table .................................. [1] Ran  
+  2024_12_03_221430_create_events ...................................... [1] Ran  
+  2024_12_03_221506_create_products_table .............................. [1] Ran  
+  2024_12_03_223520_add_category_to_products_table ..................... Pending  
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project>  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OK... E SE RODAMOS 'php artisan migrate:reset',
+
+
+
+fazemos o ROLLBACK DE TODAS AS MIGRATIONS,
+
+voltaremos ao 0...
+
+
+
+
+certo...
+
+
+
+
+QUER DIZER QUE SE QUEREMOS ADICIONAR COLUMNS A 1 TABLE QUE JÁ EXISTE,
+
+USAMOS A FACADE 
+
+
+Schema::table('table_name')...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO... E TEMOS MAIS 2 COMANDOS INTERESSANTES...
+
+
+
+
+
+
+
+SÃO ELES:
+
+
+
+
+
+
+
+
+
+1) php artisan migrate:refresh --> 
+
+
+
+    ESSE COMANDO VAI SIMPLESMENTE FAZER O ROLLBACK DA MIGRATION 
+    E FAZER O MIGRATE NOVAMENTE...
+
+
+
+
+
+
+2) php artisan migrate:fresh --> É 1 POUCO DIFERENTE...
+
+                                ELE PRIMEIRAMENTE __DELETA_  TODAS AS TABLES,
+                                E DEPOIS RODA AS MIGRATIONS...
+
+
+
+
+                                HÁ UMA LEVE DIFERENÇA ENTRE OS 2 COMANDOS...
+
+
+
+
+                                MAS SE VC QUER DEIXAR O PROJETO REALMENTE LIMPO,
+                                COMEÇAR DO 0,
+
+                                VC VAI USAR O 'fresh',
+
+                                pq ELE VAI RECRIAR AS TABLES A PARTIR DAS MIGRATIONS...
+
+
+
+
+APRENDEREMOS SOBRE MODELS E ELOQUENT NA PRÓXIMA AULA,
+
+
+
+EM QUE CRIAREMOS A MIGRATION PARA A NOSSA TABLE FINAL, DE EVENTOS...
