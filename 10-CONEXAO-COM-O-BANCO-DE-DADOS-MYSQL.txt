@@ -1,0 +1,181 @@
+
+
+
+
+
+
+
+
+A CONEXÃO DO LARAVEL COM O BANCO É CONFIGURADA PELO ARQUIVO '.env'...
+
+
+
+
+
+
+
+ISSO NOS PROPORCIONA MAIOR LIBERDADE E TAMBÉM SEGURANÇA NA APLICAÇÃO
+
+
+
+O LARAVEL UTILIZA UM ORM (OBJECT RELATIONAL MAPPING),
+chamado de 'eloquent'...
+
+
+
+
+
+
+--> E TAMBÉM UTILIZA, PARA A CRIAÇÃO DE TABELAS,
+
+AS MIGRATIONS...
+
+
+
+
+
+
+
+
+
+O PROFESSOR RODA  TUDO ISSO NO XAMPP...
+
+
+
+
+
+
+roda 
+
+
+
+
+
+
+
+php artisan migrate 
+
+
+
+
+
+
+
+--> ELE EXPLICA QUE ISSO VAI 
+
+CRIAR ALGUMAS TABLES BÁSICAS DO LARAVEL,
+
+COMO A TABLE DE USERS...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> O NEGÓCIO ENTÃO LANÇA 1 ERROR...
+
+
+
+
+
+
+
+
+
+-> O ERROR VAI DIZER QUE A DATABASE NÃO EXISTE..
+
+
+
+
+
+
+
+
+
+TEMOS VÁRIAS MANEIRAS DE CRIAR ESSE BANCO...
+
+
+É MELHOR CRIAR COM DOCKER, PARA PROJETOS LOCAIS..
+
+
+
+
+
+
+
+
+
+
+
+
+--> DEVEMOS USAR O '.env'
+
+
+PARA ALTERAR 
+
+
+O BANCO A QUE CONECTAR...
+
+
+
+
+
+
+
+
+
+
+
+-> temos as migrations em database>migrations...
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> serão criadas 
+
+
+
+users,
+
+cache,
+
+jobs,
+
+
+failed_jobs,
+
+
+password_reset...
+
+
+
+
+
+
+
+
+AGORA PODEMOS CRIAR NOSSAS PRÓPRIAS MIGRATIONS,
+E CRIAR AS TABELAS DIRECIONADAS AO PROJETO, COMO AS DE EVENTOS...
+
+
