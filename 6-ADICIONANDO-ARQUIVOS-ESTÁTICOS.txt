@@ -1,0 +1,491 @@
+
+
+
+
+
+
+
+
+
+
+
+--> UM APP WEB NORMALMENTE TEM ARQUIVOS DE CSS, JS E IMAGENS...
+
+
+
+
+
+
+
+
+--> O LARAVEL PROPORCIONA UMA MANEIRA MT FÁCIL DE ADICIONAR ARQUIVOS NO PROJETO..
+
+
+
+
+
+
+
+--> TODOS OS RECURSOS FICAM NA PASTA 'public',
+
+E TEMOS ACESSO DIRETO A ELA, NAS TAGS QUE TRABALHAM COM ARQUIVOS ESTÁTICOS...
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> OS '.css' 
+
+DAS LIBRARIES DEVEM SER COLOCADOS DENTRO DESSAS PASTAS...
+
+
+
+
+
+
+
+
+
+
+
+--> VAMOS ADICIONAR ESSES 3 TIPOS DE ARQUIVOS NO NOSSO PROJETO,
+
+
+CSS, JS E IMGS...
+
+
+
+
+
+
+
+
+
+DENTRO DA PASTA PUBLIC,
+TEMOS:
+
+
+
+
+
+1) .htaccess 
+
+2) favicon.ico 
+
+3) index.php 
+
+4) robots.txt
+
+
+
+
+
+
+
+
+
+
+-> PODEMOS CRIAR PASTAS ALI DENTRO,
+
+COMO css, js e img....
+
+
+
+
+
+
+
+
+
+--> COLOCAMOS AS IMAGES ALI DENTRO...
+
+
+
+
+
+
+
+
+
+
+
+--> certo...
+
+
+
+
+
+
+
+O PROFESSOR CRIA UM ARQUIVO DE CSS,
+
+
+'styles.css',
+
+
+
+e coloca 
+
+dentro da pasta 'css'...
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+h1 {
+    color: "red";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AÍ É SÓ LINKAR ESSE CSS, LÁ NO LARAVEL..
+
+
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Laravel</title>
+
+    <!-- Styles / Scripts -->
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+    @endif
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OU SEJA,
+ASSIM:
+
+
+
+
+    <link rel="stylesheet" href="/css/styles.css">
+
+
+
+
+
+
+
+
+
+
+FUNCIONOU...
+
+
+
+
+
+
+
+
+
+
+
+
+
+E O MESMO FUNCIONA PARA JAVASCRIPT 
+
+
+
+E IMAGES,
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Laravel</title>
+
+    <!-- Styles / Scripts -->
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+    @endif
+
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/scripts.js"></script>
+</head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+POR FIM, PODEMOS COLOCAR 1 IMAGE,
+
+TIPO ASSIM:
+
+
+
+
+
+
+<body>
+    <h1>Algum título</h1>
+    @if($nome === "Arthur") {
+    <p>{{ $nome }}</p>
+    }
+    @elseif($nome === "Pedro") {
+    <p>O nome é outro </p>
+    }
+    @else {
+    <p>O nome é ainda outro</p>
+    }
+    @endif
+
+
+    @for ($i = 0; $i < count($someArray); $i++) {{-- <p>{{ $someArray[$i] }}</p> --}}
+        @if($someArray[$i] === 2) {
+        <p>O valor é igual a 3</p>
+        }
+        @endif
+        @endfor
+
+        @php
+        $name2 = "Pedro";
+        echo $name2;
+
+        @endphp
+        {{-- COMENTÁRIO DO BLADE, QUE NÃO APARECE NO HTML FINAL --}}
+
+
+        @foreach($someNames as $name)
+        <p>{{ $loop->index }}/p>
+            <p>{{ $name }}</p>
+            @endforeach
+
+            <img src="/img/banner.jpg" alt="Laravel">
+</body>
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+É ASSIM QUE ADICIONAMOS ARQUIVOS ESTÁTICOS NO LARAVEL...
+
+
+
+
+
+
+
+
+
+
+OK... MAS É CLARO QUE ISSO N FICOU BOM... PRECISAMOS 
+
+
+ADICIONAR O CSS E O JS 
+
+
+EM 1 ARQUIVO DE LAYOUT,
+
+
+layout.blade.php,
+
+
+
+
+QUE ENTÃO SERÁ REUTILIZADO EM TODOS NOSSOS OUTROS ARQUIVOS BLADE...
+
+
+
+
+
+
+
+
+
+
+TIPO ALGO ASSIM:
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Laravel</title>
+
+    <!-- Styles / Scripts -->
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+    @endif
+
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/app.js"></script>
+</head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+E ASSIM:
+
+
+
+
+
+
+
+@extends('layout')
+<body>
+    <h1>Algum título</h1>
+    @if($nome === "Arthur") {
+    <p>{{ $nome }}</p>
+    }
+    @elseif($nome === "Pedro") {
+    <p>O nome é outro </p>
+    }
+    @else {
+    <p>O nome é ainda outro</p>
+    }
+    @endif
+
+
+    @for ($i = 0; $i < count($someArray); $i++) {{-- <p>{{ $someArray[$i] }}</p> --}}
+        @if($someArray[$i] === 2) {
+        <p>O valor é igual a 3</p>
+        }
+        @endif
+        @endfor
+
+        @php
+        $name2 = "Pedro";
+        echo $name2;
+
+        @endphp
+        {{-- COMENTÁRIO DO BLADE, QUE NÃO APARECE NO HTML FINAL --}}
+
+
+        @foreach($someNames as $name)
+        <p>{{ $loop->index }}/p>
+            <p>{{ $name }}</p>
+            @endforeach
+
+            <img src="/img/banner.jpg" alt="Laravel">
+</body>
+</html>
+
