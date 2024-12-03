@@ -28,5 +28,27 @@
     <p>O nome é ainda outro</p>
     }
     @endif
+
+
+    @for ($i = 0; $i < count($someArray); $i++) {{-- <p>{{ $someArray[$i] }}</p> --}}
+        @if($someArray[$i] === 2) {
+        <p>O valor é igual a 3</p>
+        }
+        @endif
+        @endfor
+
+        @php
+        $name2 = "Pedro";
+        echo $name2;
+
+        @endphp
+{{-- COMENTÁRIO DO BLADE, QUE NÃO APARECE NO HTML FINAL --}}
+
+
+        @foreach($someNames as $name)
+        <p>{{ $loop->index }}/p>
+        <p>{{ $name }}</p>
+        @endforeach
+
 </body>
 </html>

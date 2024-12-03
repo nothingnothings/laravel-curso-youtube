@@ -6,5 +6,9 @@ Route::get('/', function () {
     $nome = 'Arthur';
     $idade = 26;
 
-    return view('welcome', ['nome' => $nome, 'idade' => $idade]);
+    $someArray = [1, 2, 3, 4, 5];
+
+    $someNames = ['Josias', 'Maria', 'Caetano', 'Luis'];
+
+    return view('welcome', ['nome' => $nome, 'idade' => $idade, 'someArray' => $someArray, 'someNames' => $someNames]);
 });

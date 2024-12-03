@@ -1,0 +1,543 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> podemos CRIAR ESTRUTURAS DE REPETIÇÃO NO BLADE 
+
+
+
+
+
+-> EXECUTAR PHP PURO 
+
+
+
+-> ESCREVER COMENTÁRIOS NOS ARQUIVOS DE VIEW 
+
+
+
+
+-> O BLADE É REALMENTE MUITO VERSÁTIL, E NOS PERMITE CHEGAR A UM 
+RESULTADO EXCELENTE DE RENDERIZAÇÃO DE VIEWS...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> for e foreach --> são as 2 mais executadas, quando o assunto é blade...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> temos a opção de ESCREVER PHP PURO DENTRO DO BLADE....
+ 
+ PARA EXECUTAR FEATURES ESPECÍFICAS,
+
+ usando o php...
+
+
+
+
+
+ --> vc usa quando precisa programar alguma coisa 
+
+    PURAMENTE, DIRETAMENTE NA VIEW,
+
+    COMO SE ESTIVESSE MISTURANDO HTML COM PHP (como era feito antigamente)...
+
+
+
+
+
+
+
+
+
+
+
+-> ESCREVER COMENTÁRIOS NAS 
+    VIEWS DO LARAVEL É TOTALMENTE SEGURO,
+
+    PQ O BLADE NÃO RENDERIZA OS COMENTÁRIOS...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> OK... COMO PODEMOS USAR O @FOREACH?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+COMEÇAMOS COM 1 LOOP DE FOR...
+
+
+
+
+PARA ISSO, CRÍAMOS UM ARRAY NUMÉRICO,
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    $nome = 'Arthur';
+    $idade = 26;
+
+    $someArray = [1, 2, 3, 4, 5];
+
+    return view('welcome', ['nome' => $nome, 'idade' => $idade, 'someArray' => $someArray]);
+});
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AÍ, NO 'web.php',
+
+
+PODEMOS IR ESCREVENDO ASSIM:
+
+
+
+
+
+
+    @for ($i = 0; $i < count($someArray); $i++)
+        <p>{{ $someArray[$i] }}</p>
+    @endfor
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+QUER DIZER QUE TEMOS ACESSO AO ARRAY EM SI,
+
+E AOS INDEXES DO ARRAY (com "[$i]")...
+
+
+
+
+E PODEMOS COLOCAR DIRETIVAS DENTRO 
+
+DE DIRETIVAS,
+
+COMO '@if' '@elseif'
+
+
+
+dentro 
+
+
+
+
+do for,
+
+tipo assim:
+
+
+
+
+
+
+
+
+
+
+
+
+    @for ($i = 0; $i < count($someArray); $i++)
+        {{-- <p>{{ $someArray[$i] }}</p> --}}
+        @if($someArray[$i] === 2) {
+            <p>O valor é igual a 3</p>
+        }
+        @endif
+    @endfor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> QUER DIZER QUE PODEMOS PASSAR ARRAYS A VIEW,
+    E AÍ 
+
+    EXECUTAR CÓDIGO ESPECÍFICO...
+
+
+
+
+
+
+
+
+
+
+
+
+-> PODEMOS EXECUTAR CÓDIGO PHP,
+
+
+com a directive 
+
+
+'@php
+
+@endphp'...
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+        @php
+        $name2 = "Pedro";
+        echo $name2;
+
+        @endphp
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AÍ PODEMOS FAZER QUALQUER PERSONALIZAÇÃO AÍ,
+
+
+EXECUTAR 
+
+PHP DIRETAMENTE NO BLADE,
+
+SEM ESTAR PRESO A 1 CONTROLLER OU ROTA...
+
+
+
+
+
+
+
+
+
+
+
+
+--> comentário do html, normal,
+no blade,
+
+aparece lá no html final...
+
+
+
+
+
+
+
+
+
+--> MAS COMENTÁRIOS DO BLADE 
+    NÃO APARECEM...
+
+
+
+
+
+
+
+
+
+OS COMENTÁRIOS DO BLADE SÃO ASSIM:
+
+
+
+
+{{-- COMENTÁRIO DO BLADE, QUE NÃO APARECE NO HTML FINAL --}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AÍ CRIAMOS UM OUTRO ARRAY,
+
+
+
+DE 'nomes',
+
+
+
+com vários nomes...
+
+
+
+aí usamos o foreach...
+
+
+
+
+
+
+
+
+
+tipo assim:
+
+
+
+
+
+
+        @foreach($someNames as $name)
+        <p>{{ $name }}</p>
+        @endforeach
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+MAS DENTRO DO FOREACH, TEMOS UMA VARIÁVEL ESPECIAL,
+
+BUILT-IN, QUE 
+
+É 
+
+'$loop'...
+
+
+
+
+
+PODEMOS USÁ-LA ASSIM:
+
+
+
+
+
+
+        @foreach($someNames as $name)
+        <p>{{ $loop->index }}/p>
+        <p>{{ $name }}</p>
+        @endforeach
+
+
+
+
+
+
+
+
+
+
+
+é o '$loop',
+
+
+e podemos usar a property de 'index',
+
+
+que nos dá o index de cada elemento....
+
+
+
+
+temos outras propriedades, que podem ser utilizadas,
+
+dentro do '$loop'...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> VEREMOS AUTHENTICATION DO BLADE,
+
+MAIS TARDE...
