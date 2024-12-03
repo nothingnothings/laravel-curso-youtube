@@ -44,7 +44,7 @@
             </ul>
         </nav>
     </header>
-    @yield('content');
+    @yield('content')
 
     <footer>
         <p>HDC Events &copy; 2024</p>

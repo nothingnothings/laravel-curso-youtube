@@ -1,0 +1,575 @@
+
+
+
+
+
+
+
+
+
+ELOQUENT É O ORM DO LARAVEL.
+
+
+
+
+
+
+
+
+-> CADA TABLE TEM UM MODEL QUE É RESPONSÁVEL PELA INTERAÇÃO ENTRE 
+
+AS REQUISIÇÕES AO BANCO 
+
+
+
+
+-> A CONVENÇÃO PARA O MODEL É O NOME DA ENTIDADE EM SINGULAR,
+ENQUANTO QUE A TABLE É A ENTIDADE NO PLURAL..
+
+
+
+
+EX: Event e events...
+
+
+
+
+
+
+
+-> NO MODEL, FAREMOS POUCAS ALTERAÇÕES DOS ARQUIVOS,
+    E GERALMENTE CONFIGURAÇÕES __ ESPECÍFICAS...
+
+
+
+
+
+
+(GERALMENTE VAMOS ALTERAR O COMPORTAMENTO DE ALGUNS CAMPOS EM ESPECÍFICO...)
+
+
+
+
+
+(veremos um pouco disso no curso, mas é algo bem mínimo, configurações sutis)...
+
+
+
+
+
+
+
+
+
+
+
+
+PARA CRIAR 1 NOVO MODEL,
+
+
+
+podemos rodar php artisan make:controller,
+
+
+
+e aí 
+
+
+
+
+
+escrever que queremos um resource...
+
+
+
+
+
+
+
+
+
+
+-> MAS SEMPRE É MELHOR COMEÇAR PELA MIGRATION...
+
+
+
+
+--> TEMOS TAMBÉM AQUELE COMANDO QUE FAZ O CREATE DE TUDO DE UMA SÓ VEZ,
+
+QUE VIMOS NO PRIMEIRO CURSO DE LARAVEL,
+
+QUE É:
+
+
+
+
+
+php artisan make:model -m -c -f,
+
+
+
+
+
+ou 
+
+
+
+
+
+php artisan make:model -a 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO... MAS VOLTANDO AO TÓPICO EM QUESTÃO,
+
+PRECISAMOS 
+
+
+
+ADICIONAR OS CAMPOS QUE CONSTITUEM OS EVENTOS, 
+
+ESSA TABLE...
+
+
+
+
+
+
+
+
+POR ENQUANTO, VAMOS ADICIONAR APENAS OS CAMPOS NECESSÁRIOS 
+PARA ACESSAR O BANCO E RETORNAR DADOS...
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('events', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->text('description');
+            $table->string('city');
+            $table->boolean('is_private');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('events');
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+DEPOIS RODAMOS php artisan migrate:fresh,
+
+
+
+
+PARA RE-RODAR TODAS AS MIGRATIONS...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OK... MAS COMO VAMOS CONSEGUIR RESGATAR OS DADOS QUE ESTÃO NA TABLE?
+
+
+
+PRECISAMOS DE 1 MODEL...
+
+
+
+
+
+
+
+
+--> podemos criar 1 model com 
+
+
+php artisan make:model 
+
+
+
+
+
+
+
+
+
+
+
+--> JÁ FIZ ISSO, TINHA FICADO TIPO ASSIM:
+
+
+
+
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Event extends Model
+{
+    //
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OK.... ESSE MODEL VAI FAZER A CONEXÃO COM MEU BANCO, 
+    POR MEIO DO ELOQUENT...
+
+
+
+
+
+
+
+
+
+
+
+--> O PROFESSOR VAI CRIAR ALGUNS DADOS 'NA MÃO',
+PARA QUE 
+
+CONSIGAMOS RESGATAR ELES, POR MEIO DO ELOQUENT...
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+USE laravel;
+
+
+
+
+
+
+
+
+SELECT * FROM events;
+
+
+DESCRIBE laravel.events;
+
+
+INSERT INTO laravel.events
+(title,
+description,
+city,
+is_private
+)
+VALUES (
+'Exemplo',
+'Descricao',
+'Porto Alegre',
+0
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OK... MAS QUAL SERÁ A FORMA DE RESGATAR ESSES DADOS, LÁ DO BANCO?
+
+
+
+
+
+
+
+
+
+
+-> SERÁ USANDO O MODEL DE EVENTS,
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Event;
+use Illuminate\Http\Request;
+
+class EventController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        // * Example of model usage:
+        $events = Event::all();
+
+
+        return view('events.index');
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return view('events.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Event $event)
+    {
+        return view('events.show');
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Event $event)
+    {
+        return view('events.edit');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Event $event)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Event $event)
+    {
+        //
+    }
+}
+
+
+
+
+
+
+
+
+
+CERTO... AÍ PODEMOS USAR ISSO, NA VIEW:
+
+
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events - Eventos')
+
+@section('content')
+
+<h1>Todos os Eventos</h1>
+
+@foreach($events as $event)
+<p>{{ $event->title }}</p>
+<p>{{ $event->description }}</p>
+<p>{{ $event->city }}</p>
+@endforeach
+
+@endsection
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+QUER DIZER QUE JÁ CRIAMOS 1 MODEL,
+
+QUE ENTROU EM CONTATO COM O BANCO DE DADOS,
+
+E CONSEGUIMOS RETRIEVAR DADOS...
+
+
+
+
+
+
+
+EX:
+
+
+
+
+        // * Example of model usage:
+        $events = Event::all();
+
+
+
+
+
+
+
+
+
+NA PRÓXIMA AULA,
+
+
+
+
+VAMOS ESTRUTURAR A PÁGINA DE HOME,
+
+
+PARA FICAR COM A ESTRUTURA DO PROJETO FINAL...
