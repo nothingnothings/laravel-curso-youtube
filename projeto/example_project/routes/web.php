@@ -12,3 +12,21 @@ Route::get('/', function () {
 
     return view('welcome', ['nome' => $nome, 'idade' => $idade, 'someArray' => $someArray, 'someNames' => $someNames]);
 });
+
+
+
+Route::get('/contact', function () {
+    return view('contact');
+});
+
+Route::get('/produtos/{id}', function ($id) {
+
+    $busca = request('search'); // ex: ?search=Pedro
+
+    return view('produtos', ['id' => $id, 'busca' => $busca]);
+});
+
+
+Route::get('/produtos_teste/{id?}', function ($id = null) {
+    return view('produtos', ['id' => $id]);
+});

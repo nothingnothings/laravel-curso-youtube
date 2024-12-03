@@ -1,0 +1,745 @@
+
+
+
+
+
+--> JÁ VI ISSO ANTES...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> É O WRITE DE PARAMETERS, DENTRO DOS SEGMENTS DA URL...
+
+
+
+
+
+
+
+--> TAMBÉM OS QUERY PARAMETERS, ao final da url...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> PODEMOS MUDAR COMO UMA VIEW NOS RESPONDE ADICIONANDO 
+    PARAMETROS A UMA ROTA...
+
+
+
+
+
+
+--> AO DEFINIR A ROTA, DEVEMOS COLOCAR O PARÂMETRO DESTA MANEIRA: "{id}"
+
+
+
+
+
+
+
+
+
+--> PODEMOS TER PARAMETROS OPCIONAIS TAMBÉM, ADICIONANDO UMA '?'...
+
+
+ex: 
+
+ 
+ {id?}
+
+
+
+
+
+
+--> O LARAVEL ACEITA TAMBÉM QUERY PARAMETERS,
+    UTILIZANDO A SEGUINTE SINTAXE:
+
+
+    ?nome=Matheus&idade=29 
+
+
+
+
+
+
+
+
+
+
+ESCREVEMOS AS ROUTES TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    $nome = 'Arthur';
+    $idade = 26;
+
+    $someArray = [1, 2, 3, 4, 5];
+
+    $someNames = ['Josias', 'Maria', 'Caetano', 'Luis'];
+
+    return view('welcome', ['nome' => $nome, 'idade' => $idade, 'someArray' => $someArray, 'someNames' => $someNames]);
+});
+
+
+
+Route::get('/contact', function () {
+    return view('contact');
+});
+
+
+Route::get('/products', function () {
+    return view('products');
+});
+
+
+Route::get('/produtos/{id}', function ($id) {
+    return view('product', ['id' => $id]);
+});
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+-> PRECISAMOS TER ESSES 'produtos'
+
+LÁ NA VIEW PRINCIPAL,
+
+na view de 'products'...
+
+
+
+
+
+
+
+
+
+
+-> TAMBÉM PRECISAMOS DE UMA VIEW NOVA,
+
+'product.blade.php',
+
+
+QUE SERÁ USADA PARA CADA 
+
+product,
+
+
+TIPO ASSIM:
+
+
+
+
+(products.blade.php):
+
+
+
+----------------------------
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events - Produtos')
+
+@section('content')
+
+<h1>Tela de Produtos</h1>
+
+<a href="/produtos/1">Produto 1</a>
+<a href="/produtos/2">Produto 2</a>
+<a href="/produtos/3">Produto 3</a>
+<a href="/produtos/4">Produto 4</a>
+<a href="/produtos/5">Produto 5</a>
+
+@endsection
+
+
+--------------------------
+
+
+
+
+
+
+
+
+
+
+E ASSIM:
+
+
+
+(product.blade.php):
+
+
+
+
+-----------------------------------
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events - Produto')
+
+@section('content')
+<h1>Tela de Produto</h1>
+
+<p>Exibindo produto de id: {{ $id }}</p>
+@endsection
+
+
+
+-------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+QUER DIZER QUE FICOU TIPO ASSIM:
+
+
+
+
+
+
+
+
+Route::get('/produtos/{id}', function ($id) {
+    return view('produtos', ['id' => $id]);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+E ASSIM:
+
+
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events - Produto')
+
+@section('content')
+<h1>Tela de Produto</h1>
+
+<p>Exibindo produto de id: {{ $id }}</p>
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> SE TENTAMOS DEIXAR O ID como 
+
+
+'id?',
+
+
+
+
+
+E SE TENTAMOS ACESSAR A URL SEM PASSAR NENHUM VALUE DEPOIS,
+
+
+FICAMOS COM 1 ERROR... PARA EVITAR 1 ERROR,
+PODEMOS COLOCAR 
+
+
+1 PARAMETER DE FAULT,
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+Route::get('/produtos_teste/{id?}', function ($id = 1) {
+    return view('produtos', ['id' => $id]);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MAS PODEMOS COLOCAR 
+
+
+
+TAMBÉM UMA VARIÁVEL com value de 'null',
+
+
+
+E AÍ COLOCAR 1 IF 
+
+
+
+CHECANDO POR NULL NA VIEW,
+
+TIPO ASSIM:
+
+
+
+
+Route::get('/produtos_teste/{id?}', function ($id = null) {
+    return view('produtos', ['id' => $id]);
+});
+
+
+
+
+
+
+
+
+E ASSIM:
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events - Produto')
+
+@section('content')
+<h1>Tela de Produto</h1>
+
+@if(@id != null)
+
+<p>Exibindo produto de id: {{ $id }}</p>
+
+@endif
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> AGORA VAMOS QUERER PASSAR QUERY STRINGS...
+
+
+
+
+
+
+
+
+
+
+
+
+-> PARA ISSO, DEVEMOS FAZER A LÓGICA DE 
+
+request(),
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+Route::get('/produtos/{id}', function ($id) {
+
+    $busca = request('search'); // ex: ?search=Pedro
+
+    return view('produtos', ['id' => $id]);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+E PODEMOS PASSAR ISSO PARA DENTRO DA VIEW,
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+Route::get('/produtos/{id}', function ($id) {
+
+    $busca = request('search'); // ex: ?search=Pedro
+
+    return view('produtos', ['id' => $id, 'busca' => $busca]);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+E ASSIM:
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events - Produtos')
+
+@section('content')
+
+<h1>Tela de Produtos</h1>
+
+@if($busca != '')
+
+<p>O usuário está buscando por: {{ $busca }}</p>
+
+@endif
+
+<a href="/produtos/1">Produto 1</a>
+<a href="/produtos/2">Produto 2</a>
+<a href="/produtos/3">Produto 3</a>
+<a href="/produtos/4">Produto 4</a>
+<a href="/produtos/5">Produto 5</a>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AGORA, QUANDO O PROFESSOR ESCREVE 
+
+
+
+
+
+
+localhost:8000/produtos?search=camisa,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ELE FICA COM ESSE VALUE DISPLAYADO NA TELA,
+
+
+
+
+
+
+COM 'camisa',
+
+
+
+TUDO POR MEIO 
+
+
+DESSA HELPER FUNCTION DE 'request('search')',
+
+
+
+QUE PEGOU ESSE PARAMETER DIRETAMENTE NA URL...
+
+
+
+
+
+
+
+
+
+
+
+
+
+ESSA É OUTRA MANEIRA DE PEGAR PARAMETERS NO LARAVEL,
+
+COM QUERY PARAMETERS...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> AGORA APROVEITAMOS PARA FAZER O CABEÇALHO DO SITE...
+
+
+
+
+
+
+
+
+
+
+-> PARA ISSO, VAMOS ATÉ 'main.blade.php'
+
+ E ESCREVEMOS ASSIM:
+
+
+
+
+
+     <header>
+        <nav class="navbar navbar-expand-lg navbar-light">
+
+            <div class="collapse navbar-collapse" id="navbar">
+                <a href="/" class="navbar-brand">
+                    <img src="/img/hdcevents_logo.png" alt="HDC Events">
+                </a>
+            </div>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">Eventos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/" class="nav-link">Criar Eventos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/" class="nav-link">Entrar</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/" class="nav-link">Cadastrar</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+COLCOAMOS UM STYLE CSS:
+
+
+
+
+
+
+* {
+    font-family: "Roboto", sans-serif;
+}
+
+#navbar img {
+    width: 50px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+APRENDEMOS SOBRE PARAMETROS DO REQUEST, NO LARAVEL...
