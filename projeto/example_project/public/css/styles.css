@@ -140,3 +140,19 @@ footer {
 footer p {
     margin-bottom: 0;
 }
+
+
+/*  EVENT CREATE PAGE */
+#event-create-container {
+    padding: 30px;
+}
+
+#event-create-container label {
+    font-weight: bold;
+}
+
+#event-create-container input,
+#event-create-cotainer select,
+#event-create-container textarea {
+    font-size: 12px;
+}
