@@ -1,0 +1,519 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+->  AS MIGRATIONS FUNCIONAM COMO UM VERSIONAMENTO DE BANCO DE DADOS...
+
+
+
+
+
+
+
+-> PODEMOS AVANÇAR E RETROCEDER A QUALQUER MOMENTO 
+
+
+
+-> ADICIONAR COLUNAS E REMOVER DE FORMA FACILITADA 
+
+
+
+-> FAZER O SETUP DO DB DE UMA NOVA INSTALAÇÃO EM APENAS UM COMANDO..
+
+
+
+
+
+
+
+
+
+
+-> PODEMOS VERIFICAR AS MIGRATIONS COM 'migrate:status'...
+
+
+
+
+
+
+
+
+--> PODEMOS VOLTAR, COM O COMANDO DE 
+
+
+php artisan migrate:rollback
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> PODEMOS TAMBÉM ZERAR O BANCO DE DADOS FACILMENTE,
+COMEÇAR DO 0...
+
+
+
+
+
+isso com php artisan migrate:fresh 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+O PROFESSOR ABRE UMA NOVA ABA DO TERMINAL,
+
+
+E AÍ ESCREVE ASSIM:
+
+
+
+
+
+
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> php artisan make:migration
+
+  What should the migration be named?
+❯ create_events
+
+   INFO  Migration [C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project\database\migrations/2024_12_03_221430_create_events.php] created successfully.  
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+certo...
+
+
+
+
+ISSO CRIOU A TABLE DE 'events'...
+
+
+
+
+
+
+
+
+-> MAS O PROFESSOR FAZ 1 TESTE, COM 1 TABLE DE NOME 'products',
+
+
+TIPO ASSIM:
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('products');
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+ISSO JÁ CRIA UMA TABLE COM 'id' (autoincrement)
+
+e timestamps...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+UP VAI CRIAR TODAS ESSAS COLUNAS E TABLES...
+
+
+
+
+
+
+
+
+-> QUANDO FAZEMOS 'down',
+
+A TABLE VAI SER APAGADA...
+
+
+
+
+
+
+
+
+
+podemos fazer isso com 
+
+php artisan migrate:up 
+
+
+
+e 
+
+
+php artisan migrate:down 
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> php artisan migrate:status
+
+  Migration name ........................................................... Batch / Status  
+  0001_01_01_000000_create_users_table ............................................ [1] Ran  
+  0001_01_01_000001_create_cache_table ............................................ [1] Ran  
+  0001_01_01_000002_create_jobs_table ............................................. [1] Ran  
+  2024_12_03_221430_create_events ................................................. Pending  
+  2024_12_03_221506_create_products_table ......................................... Pending  
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project>
+
+
+
+
+
+
+
+
+
+
+
+SE ESCREVEMOS 'php artisan migrate',
+
+
+ISSO VAI RODAR ESSA MIGRATION,
+
+
+E ESSAS 2 TABLES SERÃO CRIADAS...
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> php artisan migrate 
+
+   INFO  Running migrations.
+
+  2024_12_03_221430_create_events ............................................ 37.42ms DONE
+  2024_12_03_221506_create_products_table .................................... 96.00ms DONE
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO... AÍ PODEMOS ADICIONAR COLUNAS A NOSSA TABLE..
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('description');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('products');
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PARA FAZER O MIGRATE DE ESSA TABLE,
+
+
+COM ESSA ALTERAÇÃO,
+
+DEVEMOS RODAR 
+
+
+
+
+'php artisan migrate:fresh'...
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> php artisan migrate:fresh
+
+  Dropping all tables ....................................................... 179.55ms DONE
+
+   INFO  Preparing database.
+
+  Creating migration table ................................................... 41.35ms DONE
+
+   INFO  Running migrations.
+
+  0001_01_01_000000_create_users_table ...................................... 199.43ms DONE
+  0001_01_01_000001_create_cache_table ....................................... 71.08ms DONE
+  0001_01_01_000002_create_jobs_table ....................................... 156.70ms DONE
+  2024_12_03_221430_create_events ............................................ 36.38ms DONE
+  2024_12_03_221506_create_products_table .................................... 45.57ms DONE
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OK... BASICAMENTE O LARAVEL SE ENCARREGA DAS OPERAÇÕES/AÇÕES NO BANCO DE DADOS...
+
+
+TUDO POR CONTA DO '.env'...
+
+
+
+
+
+
+
+
+
+-> OK... TEREMOS MAIS TIPOS DE CAMPO,
+
+TIPO ASSIM:
+
+
+
+
+
+        Schema::create('products', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 100);
+            $table->integer('qty');
+            $table->text('description');
+            $table->timestamps();
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+    O STRING TE DEIXA CRIAR 1 VARCHAR,
+
+    PARA TER 1 NÚMERO MÁXIMO DE CHARACTERS...
+
+
+
+    INTEGER É INTEGER,
+
+
+    E 'text'
+
+    são campos de texto imensos...
+
+
+
+
+
+
+
+
+
+
+
+
+--> DEVEMOS PENSAR NAS MIGRATIONS ANTES DE EXECUTAR QUAISQUER UMA DELAS,
+
+PARA TER NOSSO PROJETO ESTRUTURADO CORRETAMENTE...
+
+
+
+DEPOIS DA AULA DE MIGRATIONS, TEREMOS AS AULAS SOBRE MODEL,
+QUE SÃO AS REALMENTE IMPORTANTES...
