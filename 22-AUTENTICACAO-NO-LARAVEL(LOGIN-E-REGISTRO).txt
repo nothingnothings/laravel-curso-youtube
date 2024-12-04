@@ -1,0 +1,1036 @@
+
+
+
+
+
+
+
+
+
+
+--> PODEMOS UTILIZAR O JETSTREAM PARA APLICAR UMA AUTENTICAÇÃO 
+    DE MODO RÁPIDO NO NOSSO SISTEMA 
+
+
+
+
+-> PRIMEIRAMENTE, INSTALAMOS O PACOTE VIA COMPOSER..
+
+
+
+
+
+
+-> DEPOIS INSTALAMOS O """LIVEWIRE""", QUE SÃO COMPONENTS 
+    DE AUTENTICAÇÃO PARA O BLADE...
+
+
+
+
+
+
+--> POR FIM, RODAMOS AS MIGRATIONS...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+JETSTREAM...
+
+
+
+
+COMO INSTALAR ESSE PACOTE, VIA COMPOSER?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> NOSSO APLICATIVO USA O 'LIVEWIRE'...
+
+
+    -> ISSO PQ ESTAMOS USANDO UM APLICATIVO COM ___SESSIONS__...
+
+
+
+
+    -> VUE 
+
+
+
+--> SE ESTIVÉSSEMOS USANDO ALGO COMO O 'VUEJS',
+    USARÍAMOS __ OUTRO _ PACOTE...
+
+
+
+
+
+
+
+
+
+-> O LIVEWIRE TE DÁ COMPONENTS DO BLADE,
+
+E NÃO COMPONENTS DO VUE... OS 2 SÃO COMPLETAMENTE DIFERENTES...
+
+
+
+
+
+
+
+
+
+
+
+
+-> VAMOS USAR ESSE PACOTE PARA TER 1 APP RÁPIDO, SEGURO E EFICAZ...
+
+
+
+
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+In a Laravel application, Vue.js typically operates as a client-side framework that interacts with the backend via API calls, rather than directly interacting with session-based authentication like Livewire. For Vue.js, token-based authentication is the most common method used, especially in modern applications where Vue.js is often used with Laravel API as the backend.
+
+Types of Authentication for Vue.js in Laravel
+API Token Authentication (via Laravel Sanctum or Passport):
+
+Sanctum is the simplest and most commonly used package for token-based authentication in Laravel, especially when building SPAs (Single Page Applications) with Vue.js.
+How it works: Sanctum issues a token (usually a "Bearer Token") that the frontend (Vue.js) can send in the Authorization header with API requests. Laravel will then validate the token and authenticate the user on the server side.
+Use case: This is ideal when your Vue.js app communicates with a Laravel backend over API routes.
+Laravel Passport is another option for more complex OAuth2-based authentication, typically used for applications where more robust features (like third-party integrations) are needed.
+How it works: Passport provides full OAuth2 authentication capabilities, including access tokens and scopes.
+Use case: This is used for applications where you need more security or multiple user types (like third-party apps accessing your API).
+Session-Based Authentication (with Vue.js):
+
+While session-based authentication is common in Laravel for server-side rendered pages or Livewire, it can still work with Vue.js, although it's less typical for single-page applications.
+How it works: If your Vue.js app is part of a traditional Laravel application that uses session-based authentication, you can continue using Laravel’s built-in session authentication for your API. The frontend would then send requests to Laravel’s routes, and Laravel would manage authentication using sessions.
+Use case: This is often used when Vue.js is part of a more traditional Laravel application (e.g., full page reloads or small sections of the page being handled by Vue).
+How Token-Based Authentication Works (Sanctum Example):
+Frontend (Vue.js):
+
+The user logs in via a form in the Vue.js app.
+Vue.js sends a POST request to Laravel API with the user credentials (username and password).
+If the credentials are correct, Laravel responds with an API token (often a JSON Web Token - JWT).
+Vue.js stores this token (in localStorage or sessionStorage) and uses it in the Authorization header for subsequent API requests.
+Backend (Laravel with Sanctum):
+
+Laravel generates a token for the authenticated user using Sanctum.
+The token is returned to Vue.js and stored.
+For each subsequent API request, Vue.js includes the token in the Authorization header.
+Laravel verifies the token using Sanctum middleware and grants access to protected routes.
+Example of Vue.js Login with Sanctum (Token Authentication):
+Login Component (Vue.js):
+
+javascript
+Copiar código
+// Vue.js Login Method
+methods: {
+  async login() {
+    try {
+      const response = await axios.post('/api/login', {
+        email: this.email,
+        password: this.password,
+      });
+      
+      // Store the token in localStorage or cookies
+      localStorage.setItem('auth_token', response.data.token);
+      axios.defaults.headers['Authorization'] = `Bearer ${response.data.token}`;
+      
+      this.$router.push({ name: 'home' });
+    } catch (error) {
+      console.error("Login failed", error);
+    }
+  }
+}
+Login Route (Laravel with Sanctum):
+
+php
+Copiar código
+Route::post('/login', [AuthController::class, 'login']);
+AuthController (Laravel):
+
+php
+Copiar código
+use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+
+class AuthController extends Controller
+{
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+        
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            $token = $user->createToken('your-app-name')->plainTextToken;
+            
+            return response()->json(['token' => $token]);
+        }
+
+        return response()->json(['message' => 'Unauthorized'], 401);
+    }
+}
+Conclusion:
+For Vue.js in a Laravel application, token-based authentication (using Laravel Sanctum or Laravel Passport) is the most common and recommended approach. It provides better support for modern SPAs and decouples the frontend from backend session handling, making the app more flexible and scalable.
+
+Sanctum is typically used for simple API token authentication with SPA or mobile apps.
+Passport is for more complex OAuth2 authentication scenarios.
+While session-based authentication can still work with Vue.js, it’s less common when building modern applications where Vue.js acts as the frontend for a decoupled API.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+BASICAMENTE, COM O VUEJS, USAMOS SANCTUM...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> ABRIMOS O TERMINAL,
+
+
+    COM O LARAVEL RODANDO...
+
+
+
+
+
+
+
+
+-> AÍ VAMOS INSTALAR O PACOTE, COM O COMPOSER...
+
+
+
+
+
+
+
+
+composer require laravel/jetstream
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+INSTALADOS OS PACOTES DO JETSTREAM,
+
+
+
+DEVEMOS INSTALAR O livewire..
+
+
+
+
+
+
+
+
+
+
+-> PARA ISSO, RODAMOS 
+
+
+
+php artisan jetstream:install livewire
+
+
+
+
+
+
+
+
+
+
+
+
+-> certo... isso é para quem utiliza 
+
+    SESSIONS COM O BLADE...
+
+
+
+
+
+--> O outro, no caso, é o 'INERTIA' (ou SANCTUM),
+
+    que deve ser usado para quem usa TOKENS,
+
+    PARA APPS FRONTEND COMO VUEjs...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+
+
+
+Laravel Sanctum and Laravel Inertia are both tools that can be used in Laravel applications, but they serve very different purposes. Here's an overview of each and the key differences between them:
+
+Laravel Sanctum
+Purpose: Sanctum is an authentication system specifically designed for API token authentication. It allows you to issue API tokens to your users and authenticate API requests.
+
+Use Case: Sanctum is used for API-based authentication, particularly useful in applications where you have a frontend (like Vue.js, React, or other JavaScript frameworks) that interacts with the backend (Laravel) via API routes. It works well for Single Page Applications (SPAs), mobile apps, and any application where the frontend and backend are decoupled.
+
+How it works:
+
+Session-based or Token-based: Sanctum supports cookie-based session authentication (for SPAs) or API token authentication (for API requests).
+For SPAs, Sanctum uses Laravel’s built-in session authentication to manage user sessions and works with cookies in the browser to authenticate requests.
+For API authentication, Sanctum issues API tokens that clients (like Vue.js) include in the request headers to authenticate API requests.
+Example: You might use Sanctum in a Laravel + Vue.js application to authenticate users when they log in and send API requests to retrieve or modify data.
+
+Key Features:
+Simple to set up and use, particularly for SPAs.
+Supports API token authentication for mobile apps or external services.
+Supports session-based authentication (via cookies) for SPAs.
+Common Use Cases:
+Authenticating users in SPAs.
+Issuing API tokens for third-party applications.
+Handling authentication for mobile applications.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Laravel Inertia
+Purpose: Inertia is a front-end framework that allows you to build modern, single-page applications (SPAs) using Laravel as the backend and Vue.js, React, or Svelte for the frontend, without needing to build a full API.
+
+Use Case: Inertia allows you to create modern SPAs with Laravel but without the need to separate your frontend and backend into two different systems (like a traditional API + frontend app). It provides a way to serve full-page JavaScript components from Laravel routes as part of your regular web pages, without the need for traditional API endpoints.
+
+How it works:
+
+Instead of loading a full page on each request (like traditional web apps), Inertia allows your app to send and receive data via AJAX, while still rendering Blade views or other components as the base.
+It lets you keep the server-side rendering and routing of Laravel, but at the same time, you get the interactivity and seamless navigation of a SPA by using a JavaScript framework like Vue.js or React.
+Inertia components are rendered directly from the backend (Laravel), which simplifies the full-stack experience and reduces the need for building a separate API layer.
+Key Features:
+It bridges the gap between traditional server-side Laravel apps and modern SPAs.
+Uses Laravel Blade templates and Vue.js/React components together in the same application.
+No need for a separate API layer; pages are sent as responses, and client-side JavaScript handles the updates without full-page reloads.
+Common Use Cases:
+Building modern SPAs without needing to set up a separate API (full-stack Laravel + Vue/React).
+Wanting a single-page app feel while keeping everything in one project.
+Easier handling of authentication, routing, and page rendering without a traditional API layer.
+
+
+
+
+
+
+
+
+
+
+
+
+Key Differences Between Sanctum and Inertia:
+
+Feature	                    Laravel Sanctum	                                        Laravel Inertia
+Purpose	                API authentication system	                                SPA development framework for Laravel + Vue.js/React/Svelte
+Use Case	            Authenticating API requests with tokens or cookies	        Building modern SPAs with full-stack Laravel and JavaScript
+Backend Focus	        Focuses on authentication, including API tokens	            Focuses on rendering pages and handling frontend routing
+Frontend Framework	    Can be used with any JavaScript framework (Vue.js, React)	Primarily used with Vue.js, React, or Svelte
+API/SPA	API             token-based authentication for decoupled frontend	        No API needed; keeps everything in one stack (Laravel + JS)
+Session-based	        Supports session-based authentication for SPAs	            Does not focus on authentication but can work with Sanctum
+Routing	Manages         authentication for API routes	                            Manages page routing and rendering in the frontend
+Authentication	        Handles login/logout and API token creation	                Works seamlessly with session-based or API token authentication
+Complexity	            Can be simpler to set up if you need just authentication	Requires setting up a full-stack SPA architecture
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+When to Use Each:
+Use Sanctum if:
+
+You need to authenticate users in a SPA, especially when using a decoupled frontend (e.g., Vue.js, React).
+You need API token authentication for a mobile app or third-party service integration.
+You want to handle API authentication (like login, user details fetching, etc.).
+Use Inertia if:
+
+You want to build a modern SPA without separating your frontend and backend.
+You prefer the simplicity of Laravel’s full-stack nature but still want the interactivity of a JavaScript framework (like Vue.js or React).
+You don't need a full API layer for your app but want dynamic, AJAX-driven page updates.
+In summary, Sanctum is for authentication (API tokens and sessions), while Inertia is for building full-stack SPAs without the need for a separate API. You can use both together if your application needs both user authentication (via Sanctum) and a smooth SPA experience (via Inertia).
+
+
+
+
+
+
+
+
+
+
+
+
+
+INERTIA --> USADO PARA COISAS COMO VUEjs,
+
+            FRAMEWORKS REATIVOS DE FRONTEND...
+
+
+
+
+
+
+        
+
+
+
+
+com 'php artisan migrate:status',
+
+
+visualizamos as migrations que ainda não foram rodadas...
+
+
+
+
+
+
+
+
+
+depois disso, rodamos 
+
+
+
+php artisan migrate,
+
+
+
+para rodar as migrations...,
+
+
+
+para criar as tables adequadas...
+
+
+
+
+
+
+
+já obtive um erro:
+
+
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> php artisan jetstream:install livewire
+
+   ERROR  There are no commands defined in the "jetstream" namespace.
+
+
+
+
+
+
+
+
+
+
+
+
+NÃO ERA NADA, SÓ UM ALARME FALSO...
+
+
+
+
+
+
+
+
+
+
+PARECE QUE O LIVEWIRE É COMPATÍVEL COM O SANCTUM...
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> e o SANCTUM é usado pelo laravel jetstream...
+
+
+
+
+
+
+Sanctum is just a headless auth system. It provides session cookie- and api token authentication. Jetstream uses it alongside fortify which will register all the routes, controllers, etc.. containing the logic for login, registration, password resets...
+
+
+
+
+
+
+
+
+
+
+
+
+
+depois rodamos:
+
+
+npm install 
+
+
+e 
+
+npm run...
+
+
+
+
+
+
+
+
+
+
+
+npm run build...
+
+
+
+
+
+
+
+
+-> com isso, já teremos algumas MUDANÇAS 
+NO ARQUIVO DE routes... (web.php)...
+
+
+
+
+
+
+
+
+SÃO ESTAS:
+
+
+
+
+
+
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+});
+
+
+
+
+
+
+COMO VC PODE VER,
+
+ESSE MIDDLEWARE AÍ,
+
+QUE VAI FAZER O HANDLE DE NOSSA AUTHENTICATION...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> TEMOS TAMBÉM, AGORA, VÁRIOS ARQUIVOS BLADE NOVOS,
+
+Em resources>views>auth 
+
+
+
+
+E TAMBÉM EM 'components'...
+
+
+
+
+
+
+
+
+
+
+
+ESSES SÃO TODOS ARQUIVOS TRAZIDOS PELO LIVEWIRE,
+
+QUE PODEM SER USADOS NO NOSSO PROJETO...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+COM ISSO, GANHAMOS ACESSO A 2 NOVAS ROUTES E TELAS,
+
+
+
+
+DE '/login' 
+
+
+e 
+
+'/register'...
+
+
+
+
+
+
+
+
+--> VAMOS ATÉ O ARQUIVO DE 'main.blade.php',
+
+
+E AÍ 
+
+ADICIONAMOS OS LINKS DE LOGIN E REGISTER,
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light">
+
+            <div class="collapse navbar-collapse" id="navbar">
+                <a href="/" class="navbar-brand">
+                    <img src="/img/hdcevents_logo.svg" alt="HDC Events">
+                </a>
+            </div>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a href="/eventos" class="nav-link">Eventos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/eventos/criar" class="nav-link">Criar Eventos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/login" class="nav-link">Entrar</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/register" class="nav-link">Cadastrar</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+
+OK... FICAMOS COM ACESSO FÁCIL AO LOGIN E REGISTER...
+
+
+
+
+
+
+
+
+
+
+-> PODEMOS CADASTRAR 1 NOVO USER, PARA TESTAR...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> COMO NÓS RODAMOS AS MIGRATIONS, TEREMOS A MUDANÇA DE NOSSO PERFIL PARA 
+
+'LOGGADO',
+
+AUTENTICADO... ESTAREMOS AUTENTICADOS...
+
+
+
+
+
+
+
+
+
+
+-> NAS PRÓXIMAS AULAS, PODEREMOS APLICAR ALGUMAS MUDANÇAS,
+
+    EM RELAÇÃO A ESTARMOS LOGGADOS OU NÃO,
+
+
+    NO NOSSO APP (mudanças visuais)...
+
+
+
+
+
+
+
+--> A PRIMEIRA ALTERAÇÃO SERÁ FEITA 
+NESSA PRÓPRIA AULA...
+
+
+QUEREMOS QUE A BARRA DE NAVEGAÇÃO EXIBA INFORMAÇÃO DO USER,
+QUANDO ELE ESTIVER LOGGADO (tipo o retrato do user)...
+
+
+
+
+
+
+
+
+
+
+--> PARA ISSO, TEMOS A DIRECTIVE BLADE '@guest @endguest'...
+
+
+
+
+-> USAREMOS ESSA DIRECTIVE PARA __ sUMIR __ 
+
+    com os links de login e register,
+
+    quando estivermos logged in...
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+                 @guest
+                    <li class="nav-item">
+                        <a href="/login" class="nav-link">Entrar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/register" class="nav-link">Cadastrar</a>
+                    </li>
+                    @endguest
+
+
+
+
+
+
+
+
+
+
+
+para os outros links, 
+
+
+de create de events e ver todos events,
+
+
+colocamos a directive de '@auth'...
+
+
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+                    @auth
+                    <li class="nav-item">
+                        <a href="/dashboard" class="nav-link">Meus eventos</a>
+                    </li>
+                    @endauth
+
+
+
+
+
+
+
+
+
+
+
+PRECISAMOS, TAMBÉM, DE UM BUTTON DE LOGOUT...
+
+
+
+
+
+
+O BUTTON DE LOGOUT DEVE APARECER SOMENTE QUANDO O USER ESTIVER AUTH...
+
+
+
+
+
+
+-> COLOCAMOS DENTRO  DE '@auth',
+portanto...
+
+
+
+AÍ ESCREVEMOS ASSIM:
+
+
+
+
+
+
+
+
+
+                   @auth
+                    <li class="nav-item">
+                        <a href="/dashboard" class="nav-link">Meus eventos</a>
+                    </li>
+                    <li class="nav-item">
+                        <form action="/logout" method="POST">
+                            @csrf
+                            <a href="/logout" class="nav-link" onclick="event.preventDefault();
+                    this.closest('form').submit();">
+                                Sair
+                            </a>
+                        </form>
+                    </li>
+                    @endauth
+
+
+
+
+
+
+                
+                PARA FAZER O LOGOUT,
+
+                DEIXAMOS 1 FORM COM ACTION DE 'logout',
+
+                e aí 
+
+                temos também um @csrf..
+
+
+
+                -> ele vai executar o negócio com aquele attribute de 'onclick'...
+
+
+
+            
+            CERTO...
+
+
+
+
+            AÍ FUNCIONA O LOGIN E LOGOUT...
