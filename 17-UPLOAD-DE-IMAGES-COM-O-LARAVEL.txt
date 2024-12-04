@@ -1,0 +1,730 @@
+
+
+
+
+
+
+
+
+SALVANDO IMAGE NO LARAVEL.
+
+
+
+
+
+
+
+
+--> PARA FAZER O UPLOAD DE IMAGES, PRECISAMOS MUDAR O ENCTYPE DA FORM 
+    E TAMBÉM CRIAR UM INPUT DE ENVIO DAS MESMAS...
+
+
+
+
+--> NO CONTROLLER, VAMOS FAZER UM TRATAMENTO DE VERIFICAÇÃO DA IMAGE QUE FOI ENVIADA 
+
+
+
+--> E DEPOIS VAMOS SALVAR ELA COM UM _ NOME ÚNICO__ EM UM DIRETÓRIO DO PROJETO....
+
+
+
+
+
+
+
+--> NO BANCO, SALVAMOS __ APENAS O PATH __ PARA A IMAGEM, DENTRO DO FILESYSTEM DE NOSSO APP...
+
+
+
+
+    (para ter maior performance)...
+
+
+
+
+
+QUANDO CHAMARMOS ESSA FILE, LÁ NO FRONT, VAMOS:
+
+
+
+1) CHAMAR O CAMINHO DA IMAGEM, PELO BANCO DE DADOS 
+
+
+
+2) MAS A IMAGE ESTARÁ SALVA NO SERVIDOR/MÁQUINA...
+
+
+
+
+
+
+
+
+
+
+
+-> NO CÓDIGO, A PRIMEIRA COISA QUE PRECISAMOS FAZER É ALTERAR 
+O ENC TYPE DO FORMULÁRIO, PARA MULTIPART...
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events - Criar Evento')
+
+@section('content')
+
+<div id="create-event-container" class="col-md-6 offset-md-3">
+    <h1>Crie o seu evento</h1>
+    <form action="/eventos" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="form-group">
+            <label for="title">Evento:</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Título do evento">
+        </div>
+        <div class="form-group">
+            <label for="city">Cidade:</label>
+            <input type="text" class="form-control" id="city" name="city" placeholder="Cidade do evento">
+        </div>
+        <div class="form-group">
+            <label for="description">Descrição:</label>
+            <textarea class="form-control" id="description" name="description" placeholder="Descrição do evento"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="is_private">É privado?</label>
+            <select class="form-control" id="is_private" name="is_private">
+                <option value="0">Não</option>
+                <option value="1">Sim</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="image">Imagem:</label>
+            <input type="file" class="form-control" id="image" name="image">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Criar Evento</button>
+        </div>
+    </form>
+
+</div>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+CERTO... COM ISSO, COM 'multipart/form-data',
+
+
+
+
+FICAMOS CAPAZES DE ENVIAR FILES POR MEIO DE FORMULÁRIOS HTML...
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events - Criar Evento')
+
+@section('content')
+
+<div id="create-event-container" class="col-md-6 offset-md-3">
+    <h1>Crie o seu evento</h1>
+    <form action="/eventos" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="form-group">
+            <label for="image">Imagem do Evento:</label>
+            <input type="file" class="form-control-file" id="image" name="image">
+        </div>
+        <div class="form-group">
+            <label for="title">Evento:</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Título do evento">
+        </div>
+
+        <div class="form-group">
+            <label for="city">Cidade:</label>
+            <input type="text" class="form-control" id="city" name="city" placeholder="Cidade do evento">
+        </div>
+        <div class="form-group">
+            <label for="description">Descrição:</label>
+            <textarea class="form-control" id="description" name="description" placeholder="Descrição do evento"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="is_private">É privado?</label>
+            <select class="form-control" id="is_private" name="is_private">
+                <option value="0">Não</option>
+                <option value="1">Sim</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Criar Evento</button>
+        </div>
+    </form>
+
+</div>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+OK... AÍ EDITAMOS A LÓGICA DO CONTROLLER...
+
+
+
+
+
+
+
+
+
+--> NO CONTROLLER, NO METHOD DE STORE,
+
+
+ESCREVEMOS ASSIM:
+
+
+
+
+
+
+        // * Image Upload
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            $image = $request->file('image');
+            $filename = time() . '.' . $image->getClientOriginalExtension();
+            $path = public_path('img/events');
+            $image->move($path, $filename);
+            $event->image = $filename;
+        }
+
+
+
+
+
+
+
+
+
+
+OU SEJA,
+
+
+SE ESSE REQUEST TIVER 1 IMAGE,
+
+E SE A IMAGE FOR VALID,
+
+VAMOS QUERER PROCESSAR OS DADOS...
+
+
+
+
+
+
+
+
+
+---> MAS HÁ UMA MANEIRA BEM MELHOR/MAIS FÁCIL DE ARMAZENAR 
+    ESSA IMAGE NO FILESYSTEM...
+
+
+
+
+-> É POR MEIO DO uso do object 'UploadedFile' 
+do laravel...
+
+
+
+
+
+
+
+--> PARA USÁ-LO, BASTA SEGUIR ESTA SINTAXE:
+
+
+
+
+
+
+
+        // '->store()' is a method that exists inside of 'UploadedFile' class
+        $request->logo->store('logos'); // * This allows us to store the file in whatever place we want (s3, storage, other services, etc)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ok... mas essa é a maneira fácil de fazer isso...
+
+
+
+
+
+
+
+queremos criar 1 hash com o nome do arquivo + timestamp,
+
+
+para deixar os nomes realmente unique.
+.
+
+
+
+
+
+
+--> para isso, devemos escrever assim:
+
+
+
+
+
+
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $event = new Event();
+        $event->title = $request->title;
+        $event->city = $request->city;
+        $event->description = $request->description;
+        $event->is_private = $request->is_private;
+
+
+        // * Image Upload
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+
+            $requestImage = $request->image;
+
+            // $requestImage->store('public/img/events'); // * This is the easy way to do it, but we want to have unique names for each img file.
+
+            $extension = $requestImage->extension();
+
+            // * This name is used for storing it in the database, and also for saving in a folder.
+            $imageName = md5($requestImage->getClientOriginalName() . strtotime("now")) . "." . $extension;
+
+            // * This will save the file in the folder.
+            $requestImage->move('img/events', $imageName);
+
+            // * This will save the file in the database.
+            $event->image = $imageName;
+        }
+
+        $event->save();
+
+
+        return redirect('/')->with('msg', 'Event created successfully!'); // We redirect, and also FLASH A MESSAGE TO THE USER. This message is acessed with '@session', in the blade files.
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    COM ISSO, AS IMAGES SERÃO SALVAS DENTRO  DO FOLDER DE 'public',
+
+
+
+    dentro da pasta 'img',
+
+    dentro da pasta 'events', que será criada...
+
+
+
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $event = new Event();
+        $event->title = $request->title;
+        $event->city = $request->city;
+        $event->description = $request->description;
+        $event->is_private = $request->is_private;
+
+
+        // * Image Upload
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+
+            $requestImage = $request->image;
+
+            // $requestImage->store('public/img/events'); // * This is the easy way to do it, but we want to have unique names for each img file.
+
+            $extension = $requestImage->extension();
+
+            // * This name is used for storing it in the database, and also for saving in a folder.
+            $imageName = md5($requestImage->getClientOriginalName() . strtotime("now")) . "." . $extension;
+
+            // * This will save the file in the folder.
+            $requestImage->move('img/events', $imageName);
+
+            // * This will save the file in the database.
+            $event->image = $imageName;
+        }
+
+        $event->save();
+
+        return redirect('/')->with('msg', 'Event created successfully!'); // We redirect, and also FLASH A MESSAGE TO THE USER. This message is acessed with '@session', in the blade files.
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+
+
+
+AGORA TENTAMOS SALVAR 1 EVENT, COM ESSA IMAGE... MAS FICAREMOS COM 1 ERROR,
+
+PQ NÃO TEMOS ESSE CAMPO, 
+
+NA TABLE DE 'events'...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> 'undefined property --> image'...
+
+
+
+
+
+
+
+--> PRECISAMOS RODAR 1 MIGRATION...
+
+
+
+
+
+
+
+
+
+
+-> CRIAMOS ESSA MIGRATION,
+
+COM:
+
+
+
+php artisan make:migration add_image_to_events_table
+
+
+
+
+
+
+
+a nomenclatura é 
+
+'add_<YOUR_FIELD>_to_<YOUR_TABLE>_table
+
+
+
+
+
+
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> php  p artisan make:migration add_image_to_events_table
+                                                                                    
+   INFO  Migration [C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\examample_project\database\migrations/2024_12_04_032034_add_image_to_events_table.php r] created successfully.
+
+
+
+
+
+
+
+E ASSIM, depois de ter sido criada:
+
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('events', function (Blueprint $table) {
+            $table->string('image')->nullable();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('events', function (Blueprint $table) {
+            $table->dropColumn('image');
+        });
+    }
+};
+
+
+
+
+
+AGORA ESSE CAMPO ESTÁ FUNCIONANDO, E PODEMOS CRIAR 1 EVENT SEM PROBLEMAS...
+
+
+
+
+
+
+
+
+AGORA A IMAGEM TERÁ SIDO SALVA CORRETAMENTE, COM O HASH CODE COMO NOME...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO... ISSO FEITO,
+
+LÁ EM 
+
+
+'welcome.blade.php',
+
+
+ALTERAMOS O CÓDIGO DO FOR,
+
+
+
+
+PARA QUE 
+
+
+ENTÃO 
+
+
+
+
+NÃO SEJA EXIBIDO PLACEHOLDERS PARA AS IMAGES,
+
+
+
+
+E SIM 
+
+
+
+AS NOSSAS IMAGES,
+
+
+COLOCANDO O PATH (Que agora temos no banco)
+
+DE CADA 
+
+
+IMAGE DE EVENT, QUE TEMOS NO NOSSO SERVIDOR...
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+        @foreach($events as $event)
+        <div class="col-md-3">
+            <div class="card col-md-3">
+                <img src="/img/events/{{ $event->image }}" alt="Evento">
+                <div class="card-body">
+                    <p class="card-date">{{ $event->date }}</p>
+                    <h5 class="card-title">{{ $event->title }}</h5>
+                    <p class="card-participants">X Participantes</p>
+                    <a href="/eventos/{{ $event->id }}" class="btn btn-primary">Saber Mais</a>
+                </div>
+            </div>
+        </div>
+        @endforeach
+
+
+
+
+
+
+
+
+
+
+
+
+OK.... COM ISSO, A IMAGE/IMAGES SÃO CORRETAMENTE ADICIONADAS..
+
+
+
+
+
+
+
+
+--> FAZEMOS 1 AJUSTE NO CSS DE NOSSO APP,
+
+TIPO ASSIM:
+
+
+
+#events-container .card {
+    flex: 1 1 24%;
+    max-width: 25%;
+    border-radius: 10px;
+    padding: 0;
+    margin: .5%;
+}
+
+
+
+
+
+
+
+
+
+CERTO... CONCLUÍMOS O UPLOAD DE IMAGES...
