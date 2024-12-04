@@ -53,17 +53,9 @@ Route::get('/', function () {
 Route::get('/eventos', [EventController::class, 'index']);
 Route::get('/eventos/criar', [EventController::class, 'create'])->middleware('auth');
 Route::get('/eventos/{id}', [EventController::class, 'show']);
-Route::get('/eventos/{id}/editar', [EventController::class, 'edit'])->middleware('auth');
+Route::get('/eventos/{id}/editar', [EventController::class, 'edit']);
 Route::post('/eventos', [EventController::class, 'store']);
 Route::put('/eventos/{id}', [EventController::class, 'update']);
 Route::delete('/eventos/{id}', [EventController::class, 'destroy']);
 
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-});
+Route::get('/dashboard', [EventController::class, 'dashboard'])->middleware('auth');

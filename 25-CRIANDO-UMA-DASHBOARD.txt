@@ -1,0 +1,656 @@
+
+
+
+
+
+
+
+
+
+--> AGORA QUE USUÁRIOS ESTÃO LIGADOS A EVENTOS,
+    PODEMOS CRIAR UMA __ DASHBOARD_...
+
+
+
+
+
+
+
+--> ELA VAI INFORMAR TODOS OS EVENTOS QUE O USUÁRIO POSSUI...
+
+
+
+
+
+
+
+
+--> FUTURAMENTE, TAMBÉM VAMOS ADICIONAR AS AÇÕES DE __eDIÇÃO__ 
+
+E DE __ DELETAR EVENTO, NESSA VIEW...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> PARA ISSO TUDO, TEMOS A 
+
+    VIEW de ´dashboard.blade.php',
+
+    lá do jetstream..
+
+
+
+
+
+
+essa view:
+
+
+1) JÁ FUNCIONA 
+
+2) TEM ROTA PRONTA 
+
+
+
+
+--> DEVEMOS APROVEITÁ-LA...
+
+
+
+
+
+
+
+
+
+--> ELA FICA DIRETAMENTE NO ROOT DO NOSSO PROJETO...
+
+
+
+
+
+
+-> ELA ATUALMENTE APROVEITA O TEMPLATE DO JETSTREAM:
+
+
+
+
+
+
+
+
+
+
+
+
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Dashboard') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+                <x-welcome />
+            </div>
+        </div>
+    </div>
+</x-app-layout>
+
+
+
+
+
+
+
+
+
+--> TEM UM TEMPLATE DO LIVEWIRE...
+
+
+
+
+
+
+
+
+-> VAMOS TIRAR ESSES COMPONENTS,
+
+PQ 
+
+
+VAMOS USAR O BLADE NATIVO...
+
+
+
+
+
+
+
+
+
+
+
+-> COPIAMOS NOSSAS DIRECTIVES DE LAYOUT NESSE dashboard.blade.php,
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'Dashboard')
+
+@section('content')
+
+
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+AÍ ESCREVEMOS O HTML, DENTRO DESSE 'section(content)',
+
+
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'Dashboard')
+
+@section('content')
+
+<div class="col-md-10 offset-md-1 dashboard-title-container">
+    <h1>Meus eventos</h1>
+</div>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO... AGORA, SEMPRE QUE LOGGARMOS, VAMOS CAIR NESSA PAGE...
+
+
+
+
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+Route::get('/', function () {
+
+
+    $search = request('search'); // * this utilizes the url's query parameters. GET request in the form.
+
+    // * Used with the search form.
+    if ($search) {
+        $events = Event::where(['title', 'LIKE', '%' . $search . '%'])->get();
+    } else {
+        $events = Event::all();
+    }
+
+
+    return view('welcome', ['events' => $events, 'search' => $search]);
+});
+
+Route::get('/eventos', [EventController::class, 'index']);
+Route::get('/eventos/criar', [EventController::class, 'create'])->middleware('auth');
+Route::get('/eventos/{id}', [EventController::class, 'show']);
+Route::get('/eventos/{id}/editar', [EventController::class, 'edit']);
+Route::post('/eventos', [EventController::class, 'store']);
+Route::put('/eventos/{id}', [EventController::class, 'update']);
+Route::delete('/eventos/{id}', [EventController::class, 'destroy']);
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MAIS TARDE, FAREMOS 1 RELATION MANY-TO-MANY ENTRE 
+
+USUÁRIOS E EVENTOS (participants)...
+
+
+
+
+
+
+
+AÍ ESCREVEMOS ASSIM:
+
+
+
+
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'Dashboard')
+
+@section('content')
+
+<div class="col-md-10 offset-md-1 dashboard-title-container">
+    <h1>Meus eventos</h1>
+</div>
+
+<div class="col-md-10 offset-md-1 dashboard-events-container">
+    @if(count($events) > 0)
+
+    @else
+    <h2>Você não possui eventos cadastrados. <a href="/eventos/criar">Criar um novo evento.</a></h2>
+    @endif
+</div>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+NO ARQUIVO DE ROUTES,
+
+
+ADICIONAMOS UMA ROUTE DE '/dashboard',
+
+PARA QUE ELA EXECUTE A ACTION DE 'index',
+LÁ NO NOSSO CONTROLLER DE 'events',
+
+
+TIPO ASSIM:
+
+
+
+
+
+Route::get('/dashboard', [EventController::class, 'dashboard'])->middleware('auth');
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+});
+
+
+
+
+
+
+
+
+
+
+
+
+BASICAMENTE, TEREMOS ESSE METHOD, 'dashboard',
+
+dentro do controller de 'EventController'...
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO... 
+
+
+
+AÍ, LÁ NO CONTROLLER DE 'EventController',
+
+
+
+
+ESCREVEMOS A ACTION DE DASHBOARD_,
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+    public function dashboard()
+    {
+        $user = Auth::user();
+
+        $events = $user->events;
+
+        return view('events.dashboard', ['events' => $events]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+com isso, vamos basicamente pegar os events de nosso user,
+
+diretamente...
+
+
+
+
+
+
+
+
+
+
+SÓ PRECISAMOS CRIAR ESSE TEMPLATE,
+
+'dashboard',
+
+dentro do folder de 'events'...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DEPOIS DISSO TUDO,
+
+SIMPLESMENTE __ DELETAMOS __ A ROUTE DE DASHBOARD 
+
+
+
+DO sanctum,
+
+APAGAMOS TODO ESTE TRECHO:
+
+
+
+
+
+
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+});
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+APAGAMOS ESTA ROUTE, E DEIXAMOS APENAS A NOSSA:
+
+
+
+
+
+Route::get('/dashboard', [EventController::class, 'dashboard'])->middleware('auth');
+
+
+
+
+
+
+
+
+
+
+
+
+COM ISSO, MESMO ASSIM,
+
+AINDA FUNCIONA A LÓGICA DE AUTH GUARD DE 'login' e 'register'...
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+AÍ, LÁ NO events.dashboard,
+
+CRIAMOS UMA TABLE HTML PARA MOSTRAR OS DADOS,
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Participantes</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($events as $event)
+            <tr>
+                <td scope="row">{{ $loop->index + 1 }}</td>
+                <td>{{ $event->title }}</td>
+                <td>{{ $event->participants }}</td>
+                <td>
+                    <a href="/eventos/{{ $event->id }}/editar" class="btn btn-primary">Editar</a>
+                    <form action="/eventos/{{ $event->id }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+
+
+
+
+
+os participants ainda não funcionam...
+
+
+
+
+
+
+
+
+e as actions também ainda não...
+
+
+
+
+
+COLOCAMOS MAIS 1 POUCO DE CSS:
+
+
+
+
+
+/* DASHBOARD */
+
+.dashboard-title-container {
+    margin-bottom: 30px;
+    margin-top: 30px;
+}
+
+.dashboard-events-container th {
+    width: 25%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO... QUER DIZER QUE CRIAMOS A VIEW DE DASHBOARD,
+
+E CRIAMOS A ROTA PARA A DASHBOARD,
+
+TIRANDO A ROTA DEFAULT DO JETSTREAM (o que é bom)...
