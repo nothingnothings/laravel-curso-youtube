@@ -65,8 +65,15 @@ class User extends Authenticatable
         ];
     }
 
+    // Used with the 'owner of these event' feature.
     public function events()
     {
         return $this->hasMany(Event::class);
+    }
+
+    // Used with the PARTICIPANTS feature. A single user can participate in multiple events.
+    public function eventsAsParticipant()
+    {
+        return $this->belongsToMany(Event::class);
     }
 }

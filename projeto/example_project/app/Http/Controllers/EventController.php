@@ -98,7 +98,7 @@ class EventController extends Controller
     {
         $user = Auth::user();
 
-        $events = $user->events;
+        $events = $user->eventsAsParticipant;
 
         return view('events.dashboard', ['events' => $events]);
     }
@@ -177,5 +177,19 @@ class EventController extends Controller
         $event->delete();
 
         return redirect('/dashboard')->with('msg', 'Evento excluído com sucesso!');
+    }
+
+    /**
+     * Participate in an event.
+     */
+    public function participate(string $eventId)
+    {
+        $event = Event::findOrFail($eventId);
+
+        $user = Auth::user();
+
+        $event->users()->attach($user->id);
+
+        return redirect('/dashboard')->with('msg', 'Você agora está participando deste evento!');
     }
 }

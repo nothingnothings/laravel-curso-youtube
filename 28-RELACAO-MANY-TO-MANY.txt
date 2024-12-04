@@ -1,0 +1,718 @@
+
+
+
+
+
+
+
+
+
+
+RELATIONS (MANY TO MANY)
+
+
+
+
+
+
+
+-> VAMOS APRENDER UMA NOVA RELAÇÃO DE REGISTRO PELO LARAVEL,
+
+
+MANY-TO-MANY...
+
+
+
+
+
+
+
+
+
+-> VAMOS APLICAR ESSA LÓGICA À PARTICIPAÇÃO 
+    DE EVENTOS,
+
+    ONDE UM USUÁRIO PODE TER VÁRIOS EVENTOS, E UM EVENTO PODE TER VÁRIOS PARTICIPANTES...
+
+
+
+
+
+
+
+
+-> PRECISAREMOS CRIAR UMA NOVA TABLE QUE ADMINISTRA 
+ESSAS RELAÇÕES,
+
+SEGUINDO TAMBÉM A CONVENÇÃO DO LARAVEL...
+
+
+
+
+
+
+
+
+
+
+
+
+
+A TABELA DAS RELATIONS VAI TER:
+
+
+1) O NOME, EM ORDEM ALFABÉTICA, DE 1 TABELA + DEPOIS A OUTRA...
+
+
+
+NO NOSSO CASO, será 
+
+'events_users'...
+
+
+
+
+2) DENTRO DESSA TABLE, TEREMOS AS COLUMNS:
+
+
+    1) event_id 
+
+
+    2) user_id 
+
+
+
+    ISSO QUE FARÁ A INTERLIGAÇÃO ENTRE OS 2...
+
+
+
+
+
+
+3) TEREMOS, ALÉM DISSO,
+    1 METHOD EM CADA 1 DOS MODELS,
+
+    QUE PODERÁ SER CHAMADO PARA 'VER OS EVENTS A QUE 1 USER ESTÁ PARTICIPANDO',
+
+
+    E OUTRO PARA 'VER QUE PARTICIPANTS ESTÃO NESSE EVENTO'...
+
+
+
+
+
+
+
+
+--> QUEREMOS TER 1 ACTION QUE INSIRA 
+    A 'PARTICIPAÇÃO' DE 1 USER EM 1 DETERMINADO EVENTO..
+
+
+
+
+
+
+
+
+
+
+
+--> VOLTAMOS AO CÓDIGO...
+
+
+
+
+
+
+
+
+-_> VAMOS RODAR 1 MIGRATION...
+
+
+
+
+
+
+
+
+
+
+
+
+--> provavelmente 
+
+será 
+
+
+
+php artisan make:migration create_event_user_table
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OK... ISSO VAI CRIAR A TABLE...
+
+
+
+o código começa assim:
+
+
+
+
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('event_user', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('event_user');
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+AGORA COLOCAMOS AS CHAVES DO USER E DOS EVENTS...
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('event_user', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('event_id')->constrained();
+            $table->foreignId('user_id')->constrained();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('event_user');
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+NOS MODELS,
+
+PRECISAMOS FAZER ALTERAÇÕES...
+
+
+
+
+
+COMEÇAMOS PELO MODEL DE 'Event',
+
+TIPO ASSIM:
+
+
+
+
+
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
+
+
+
+
+
+
+
+
+NO CASO,
+
+
+
+
+JÁ TÍNHAMOS 'user()',
+
+
+MAS AGORA TEREMOS 'users()',
+
+QUE SERÁ USADO PARA _ OS PARTICIPANTS...
+
+
+
+
+
+
+
+
+
+
+JÁ NO OUTRO LADO, LADO DO USER,
+
+JÁ TEMOS 
+
+
+o method de 'events()',
+
+
+POR ISSO VAMOS USAR OUTRO NOME PARA ESSA FEATURE,
+
+
+DE NOME 
+
+
+''eventsAsParticipant'':
+
+
+
+
+
+
+
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    public function eventsAsParticipant()
+    {
+        return $this->belongsToMany(Event::class);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+
+
+COM ISSO, JÁ FIZEMOS AS LIGAÇÕES DELES...
+
+
+
+
+
+
+
+--> PODEMOS, DEPOIS DE TUDO MIGRADO CERTINHO,
+
+CHAMAR ESSA PROPRIEDADE 
+
+
+de 
+
+'->eventsAsParticipant'
+
+
+
+
+E CONSEGUIR PASSÁ-LA PARA A VIEW...
+
+
+
+
+
+
+
+
+
+
+
+-> MIGRAMOS TUDO ISSO, 
+
+com php artisan migrate...
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+AGORA PRECISAMOS CRIAR A MANEIRA DE 'INTERLIGAR 1 AO OUTRO'...
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> A FORMA MAIS FÁCIL DE FAZER ISSO 
+
+
+É USAR AQUELE BUTTON DE 'Confirmar Presença',
+
+LÁ NO FRONTEND...
+
+
+
+
+NESTA PARTE, em 'show.blade.php':
+
+
+
+
+
+
+<div class="col-md-10 offset-md-1">
+    <div class="row">
+        <div id="image-container" class="col-md-6">
+            <img src="/img/events/{{ $event->image }}" class="img-fluid" alt="Evento {{ $event->title }}">
+        </div>
+        <div id="info-container" class="col-md-6">
+            <h1>{{ $event->title }}</h1>
+            <p class="event-city">
+                <ion-icon name="location-outline"></ion-icon> {{ $event->city }}
+            </p>
+            <p class="event-participants">
+                <ion-icon name="people-outline"></ion-icon> X Participantes
+            </p>
+            <p class="event-owner">
+                <ion-icon name="star-outline"></ion-icon> {{ $eventOwner['name'] }}
+            </p>
+            <a href="#" class="btn btn-primary" id="event-submit">Confirmar Presença</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> PRECISAMOS FAZER 1 ACTION QUE VAI UNIR 
+
+1 USER A UM EVENTO,
+
+DE MODO QUE 1 PERTENÇA AO OUTRO, NESSE MANY-TO-MANY...
+
+
+
+
+
+
+
+
+
+--> PARA ISSO, CRIAMOS UMA NOVA ROUTE,
+
+
+
+DE TIPO 'post'...
+
+
+
+
+-> será 'eventos/participar'...
+
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+Route::get('/eventos/criar', [EventController::class, 'create'])->middleware('auth');
+Route::get('/eventos/participar/{id}', [EventController::class, 'participate'])->middleware('auth');
+
+
+
+
+
+
+
+
+
+
+
+
+NESSE 'id',
+
+
+VAMOS PEGAR O ID DO EVENTO,
+
+
+PQ O ID DO USER JÁ PODE SER OBTIDO LÁ DE 
+
+
+
+auth()->user...
+
+
+
+
+
+
+
+
+
+ficou tipo assim, inicialmente:
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Participate in an event.
+     */
+    public function participate(string $eventId)
+    {
+        $event = Event::findOrFail($eventId);
+
+        $user = Auth::user();
+
+        // Check if the user is the owner of the event:
+        if ($user->id != $event->user_id) {
+            return redirect('/')->with('msg', 'Você não pode participar deste evento!');
+        }
+
+        $event->users()->attach($user->id);
+
+        return redirect('/dashboard')->with('msg', 'Você agora está participando deste evento!');
+    }
+
+
+
+
+
+
+
+
+
+
+LÁ NO FRONTEND,
+
+
+COLOCAMOS A ACTION PARA PARTICIPAR DO EVENTO,
+
+COM 1 FORM...
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+            <form action="/eventos/participar/{{ $event->id }}" method="POST">
+                @csrf
+                <a href="/eventos/participar/{{ $event->id }}" id="event-submit" class="btn btn-primary" onclick="event.preventDefault(); this.closest('form').submit();">Participar</a>
+            </form>
+
+
+
+
+
+
+
+
+
+
+
+
+OK... DEU CERTO...
+
+
+
+AGORA SÓ PRECISAMOS CONSERTAR O DISPLAY DAS INFORMAÇÕES, NA 
+
+VIEW DE 'dashboards',
+
+o display dos participants...
+
+
+
+
+
+
+
+
+
+
+
+
+MAS COMO PODEMOS FAZER O SHOW DO NÚMERO DE PARTICIPANTS?
+
+
+
+
+
+
+
+
+--> TIPO ASSIM:
+
+
+
+
+
+          <p class="event-participants">
+                <ion-icon name="people-outline"></ion-icon> {{ count($event->users) }} Participantes
+            </p>
+
+
+
+
+
+
+
+
+    certo...
+
+
+
+
+
+
+
+
+certo...
+
+
+
+
+
+isso foi possível graças ao method, no model...
+
+
+
+
+
+
+AGORA TEMOS A POSSIBILIDADE DE MELHORAR NOSSA DASHBOARD...
+
+
+
+DEIXAR 1 SEÇÃO PARA 'EVENTOS EM QUE ESTOU PARTICIPANDO',
+
+
+E TAMBÉM 1 ACTION PARA 'SAIR DO EVENTO'...

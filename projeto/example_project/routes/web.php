@@ -51,6 +51,7 @@ Route::get('/', function () {
 });
 
 Route::get('/eventos/criar', [EventController::class, 'create'])->middleware('auth');
+Route::post('/eventos/participar/{id}', [EventController::class, 'participate'])->middleware('auth');
 Route::get('/eventos/{id}', [EventController::class, 'show']);
 Route::get('/eventos/{id}/editar', [EventController::class, 'edit'])->middleware('auth'); // * This route is used to edit an event.
 Route::put('/eventos/{id}', [EventController::class, 'update'])->middleware('auth'); // * This route is used to update an event.

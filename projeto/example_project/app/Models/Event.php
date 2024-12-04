@@ -11,9 +11,16 @@ class Event extends Model
 
     protected $dates = ['date']; // This will make it so that fields passed to the 'date' field are considered as 'dateTime' data type...
 
+    // Used with the 'owner of an event' feature.
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Used with the PARTICIPANTS feature. An event can have multiple users as participants.
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
     }
 
     protected $guarded = [];
