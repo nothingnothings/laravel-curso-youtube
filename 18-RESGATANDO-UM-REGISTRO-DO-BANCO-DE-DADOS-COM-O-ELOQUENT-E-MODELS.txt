@@ -1,0 +1,744 @@
+ 
+ 
+
+
+
+
+
+
+
+RESGATANDO UM REGISTRO DO BANCO DE DADOS:
+
+
+
+
+
+
+
+
+
+
+
+--> VAMOS FAZER A VIEW DO EVENTO, NESTA AULA 
+
+
+
+
+
+-> E, COM ISSO, VAMOS APRENDER A RESGATAR __ APENAS 1 ÚNICO REGISTRO, PELO ELOQUENT.
+
+
+
+
+
+
+-> VAMOS UTILIZAR O METHOD 'findOrFail'
+
+
+
+
+
+
+
+-> E TAMBÉM VAMOS CRIAR UMA NOVA VIEWE E ROTA PARA ESSA FUNÇÃO.
+
+
+
+
+
+
+
+
+
+
+-> ESSA TELA TERÁ A FUNÇÃO DE EXIBIR TODAS AS INFORMAÇÕES DO EVENTO,
+
+E TAMBÉM O BOTÃO DE 'participar'...
+
+
+
+
+
+
+
+
+
+-> VAMOS MUDAR O LINK NA HOME, PARA TODOS OS EVENTOS...
+
+
+
+
+
+
+
+
+
+OK...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-_> OK...
+
+
+
+
+
+
+
+
+
+
+
+
+VAMOS CRIAR NOVAS ROTAS,
+
+NO ARQUIVO DE ROTAS...
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+Route::get('/eventos/{id}', [EventController::class, 'show']);
+
+
+
+
+
+
+
+
+CERTO... 
+
+
+
+
+
+
+
+
+
+LÁ NO WELCOME.BLADE.PHP,
+
+EM QUE TEMOS TODOS OS EVENTOS,
+
+PODEMOS ESCREVER ASSIM:
+
+
+
+
+
+
+        @foreach($events as $event)
+        <div class="col-md-3">
+            <div class="card col-md-3">
+                <img src="/img/events/{{ $event->image }}" alt="Evento">
+                <div class="card-body">
+                    <p class="card-date">{{ $event->date }}</p>
+                    <h5 class="card-title">{{ $event->title }}</h5>
+                    <p class="card-participants">X Participantes</p>
+                    <a href="/eventos/{{ $event->id }}" class="btn btn-primary">Saber Mais</a>
+                </div>
+            </div>
+        </div>
+        @endforeach
+
+
+
+
+
+
+
+
+
+
+
+
+COMO VC PODE VER,
+
+
+JÁ TEMOS UMA URL PARA O '/events',
+
+
+até o 
+
+segment em que temos '$event->id',
+
+
+
+EXTRAÍDO DE CADA ELEMENTO 'EVENT' QUE É RETRIEVADO DO BANCO DE DADOS...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+DEPOIS DISSO,
+
+
+
+
+
+
+
+VAMOS ATÉ O EventController,
+
+e escrevemos a action de 'show()",
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Event $event)
+    {
+        return view('events.show');
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> COLOCAMOS QUE VAMOS RECEBER UM '$event'...
+
+
+
+
+
+
+
+
+
+
+-> ENTRETANTO, O QUE O PROFESSOR FAZ, NA AULA DELE,
+
+É O RECEIVE DE APENAS o '$id',
+
+PQ O ID JÁ VAI VIR LÁ DA ROUTE...
+
+
+
+
+
+
+--> PARA ISSO, ESCREVEMOS ASSIM:
+
+
+
+
+
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $eventId)
+    {
+
+        $event = Event::findOrFail($eventId);
+
+        return view('events.show');
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+OK... AÍ VAMOS RETORNAR ESSE EVENT ESPECÍFICO, COM 1 ASSOC ARRAY,
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $eventId)
+    {
+
+        $event = Event::findOrFail($eventId);
+
+        return view('events.show', ['event' => $event]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+FUTURAMENTE,
+NESSA 
+
+ACTION,
+
+VAMOS FAZER OUTRAS COISAS,
+
+
+
+COMO 
+
+
+'send the user' (para ver se REALMENTE É O USER FAZENDO ESSA ACTION, AUTHORIZATION, BASICAMENTE),
+
+
+
+'send the number of participants' e etc...
+
+
+
+
+
+
+
+
+-> MAS COMO QUEREMOS MANDAR APENAS O EVENTO CRU, NESSE MOMENTO,
+
+DEIXAMOS ASSIM...
+
+
+
+
+
+
+
+
+
+
+-> NO FOLDER DE 'events',
+
+
+ESCREVEMOS ASSIM:
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events - Evento')
+
+@section('content')
+
+<div id="event-show-container" class="col-md-6 offset-md-3">
+    <h1>{{ $event->title }}</h1>
+    <p class="subtitle">Data: {{ $event->date }}</p>
+    <p class="subtitle">Cidade: {{ $event->city }}</p>
+    <p class="subtitle">Descrição: {{ $event->description }}</p>
+    <p class="subtitle">É Privado: {{ $event->is_private }}</p>
+    <img src="/img/events/{{ $event->image }}" alt="Evento">
+</div>
+
+@endsection
+
+
+
+
+
+
+É CLARO QUE VAMOS EDITAR 1 POUCO ISSO...
+
+
+
+
+
+
+
+COLOCAMOS O TITLE DO EVENTO ALI NA SECTION DE 'title',
+
+
+
+para editar o title da página...
+
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', $event->title)
+
+@section('content')
+
+<div id="event-show-container" class="col-md-6 offset-md-3">
+    <h1>{{ $event->title }}</h1>
+    <p class="subtitle">Data: {{ $event->date }}</p>
+    <p class="subtitle">Cidade: {{ $event->city }}</p>
+    <p class="subtitle">Descrição: {{ $event->description }}</p>
+    <p class="subtitle">É Privado: {{ $event->is_private }}</p>
+    <img src="/img/events/{{ $event->image }}" alt="Evento">
+</div>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+depois disso, editamos o html,
+tipo assim:
+
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', $event->title)
+
+@section('content')
+
+
+<div class="col-md-10 offset-md-1">
+    <div class="row">
+        <div id="image-container" class="col-md-6">
+            <img src="/img/events/{{ $event->image }}" class="img-fluid" alt="Evento {{ $event->title }}">
+        </div>
+        <div id="info-container" class="col-md-6">
+            <h1>{{ $event->title }}</h1>
+            <p class="event-date">Data: {{ $event->date }}</p>
+            <p class="event-city">
+                <ion-icon name="location-outline"></ion-icon> {{ $event->city }}
+            </p>
+            <p class="event-description">
+                <ion-icon name="information-circle-outline"></ion-icon> {{ $event->description }}
+            </p>
+        </div>
+    </div>
+</div>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+ADICIONAMOS UM DOS 'ion-icon',
+
+
+E AÍ 
+
+
+COLOCAMOS A DATA DA CITY DE CADA EVENT...
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', $event->title)
+
+@section('content')
+
+
+<div class="col-md-10 offset-md-1">
+    <div class="row">
+        <div id="image-container" class="col-md-6">
+            <img src="/img/events/{{ $event->image }}" class="img-fluid" alt="Evento {{ $event->title }}">
+        </div>
+        <div id="info-container" class="col-md-6">
+            <h1>{{ $event->title }}</h1>
+            <p class="event-city">
+                <ion-icon name="location-outline"></ion-icon> {{ $event->city }}
+            </p>
+            <p class="event-participants">
+                <ion-icon name="people-outline"></ion-icon> X Participantes
+            </p>
+            <p class="event-owner">
+                <ion-icon name="start-outline"></ion-icon> Dono do Evento:
+            </p>
+            <a href="#" class="btn btn-primary" id="event-submit">Confirmar Presença</a>
+        </div>
+    </div>
+</div>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+
+MAS AGORA TEREMOS UMA OUTRA COLUNA HTML,
+
+
+EM QUE TEREMOS A DESCRIPTION E A DATE...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', $event->title)
+
+@section('content')
+
+
+<div class="col-md-10 offset-md-1">
+    <div class="row">
+        <div id="image-container" class="col-md-6">
+            <img src="/img/events/{{ $event->image }}" class="img-fluid" alt="Evento {{ $event->title }}">
+        </div>
+        <div id="info-container" class="col-md-6">
+            <h1>{{ $event->title }}</h1>
+            <p class="event-city">
+                <ion-icon name="location-outline"></ion-icon> {{ $event->city }}
+            </p>
+            <p class="event-participants">
+                <ion-icon name="people-outline"></ion-icon> X Participantes
+            </p>
+            <p class="event-owner">
+                <ion-icon name="star-outline"></ion-icon> Dono do Evento:
+            </p>
+            <a href="#" class="btn btn-primary" id="event-submit">Confirmar Presença</a>
+        </div>
+        <div class="col-md-12" id="description-container">
+            <h3>Sobre o evento:</h3>
+            <p class="event-description">{{ $event->description }}</p>
+        </div>
+    </div>
+</div>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+AGORA PRECISAMOS DO CSS DA PÁGINA DE EVENTO....
+
+
+
+
+
+FICA TIPO ASSIM:
+
+
+
+
+
+/* EVENT PAGE */
+
+#image-container,
+#info-container {
+    margin-top: 30px;
+}
+
+#image-container img {
+    border-radius: 10px;
+}
+
+#info-container h1 {
+    font-size: 36px;
+    font-weight: 900;
+}
+
+#info-container p {
+    margin: 0;
+    font-size: 14px;
+    display: flex;
+}
+
+#info-container h3,
+#description-container h3 {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#info-container ion-icon {
+    font-size: 20px;
+    color: #F2A340;
+    margin-right: 5;
+}
+
+#info-container #event-submit {
+    margin: 20px 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+RESUMINDO:
+
+
+
+
+
+1) FIZEMOS NOSSA ROUTE DE ID, ROTA DINÂMICA ....
+
+
+
+
+2) ENCONTRA OU FALHA A ENCONTRAR 1 EVENTO, AO ENTRAR NA ROUTE DE SHOW...
+
+
+
+3) A ROUTE DE SHOW MOSTRA OS DADOS DO EVENTO...
+
+
+
+
+
+
+
+
