@@ -21,10 +21,14 @@
             <p class="event-owner">
                 <ion-icon name="star-outline"></ion-icon> {{ $eventOwner['name'] }}
             </p>
+            @if (!$hasUserJoined)
             <form action="/eventos/participar/{{ $event->id }}" method="POST">
                 @csrf
                 <a href="/eventos/participar/{{ $event->id }}" id="event-submit" class="btn btn-primary" onclick="event.preventDefault(); this.closest('form').submit();">Participar</a>
             </form>
+            @else
+            <p class="already-joined-msg">Você já está participando deste evento.</p>
+            @endif
             <h3>O evento conta com:</h3>
             <ul class="event-items">
                 @foreach($event->items as $item)

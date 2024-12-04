@@ -59,4 +59,6 @@ Route::post('/eventos', [EventController::class, 'store']);
 
 Route::delete('/eventos/{id}', [EventController::class, 'destroy'])->middleware('auth');
 
+Route::delete('/eventos/sair/{id}', [EventController::class, 'leaveEvent'])->middleware('auth');
+
 Route::get('/dashboard', [EventController::class, 'dashboard'])->middleware('auth');
