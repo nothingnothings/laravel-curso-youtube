@@ -39,7 +39,7 @@ class EventController extends Controller
         $event->is_private = $request->is_private;
         $event->save();
 
-        return redirect('/');
+        return redirect('/')->with('msg', 'Event created successfully!'); // We redirect, and also FLASH A MESSAGE TO THE USER. This message is acessed with '@session', in the blade files.
     }
 
     /**
