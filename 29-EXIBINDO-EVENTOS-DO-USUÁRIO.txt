@@ -1,0 +1,390 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> OK...
+
+
+
+
+
+
+
+
+
+VAMOS MELHORAR A DASHBOARD.BLADE.PHP,
+
+
+ 
+
+ DEIXANDO:
+
+
+
+ 1) EVENTOS EM QUE O USER PARTICIPA 
+
+
+ 2) EVENTS DE QUE O USER É DONO...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ --> VAMOS IMPLEMENTAR ALGUMAS OUTRAS COISAS...
+
+
+
+
+
+
+
+
+
+
+
+
+
+ -> VAMOS MELHORAR A RODA DE DASHBOARD...
+
+
+
+
+
+
+
+
+ --> O PROFESSOR ESTAVA ENVIANDO APENAS OS 
+
+    EVENTOS DE QUE O USER ERA DONO...
+
+
+
+
+
+-> MAS AGORA VAMOS ENVIAR 2 TIPOS DE EVENTS,
+
+
+OS EM QUE ELE PARTIICPA,
+
+
+
+E OS QUE ELE É DONO...
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+    public function dashboard()
+    {
+        $user = Auth::user();
+
+        $eventsAsOwner = $user->events;
+
+        $eventsAsParticipant = $user->eventsAsParticipant;
+
+        return view('events.dashboard', ['events' => $eventsAsOwner, 'eventsAsParticipant' => $eventsAsParticipant]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+AÍ, NA VIEW,
+
+DE DASHBOARD, ESCREVEMOS TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Participantes</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($eventsAsParticipant as $event)
+            <tr>
+                <td scope="row">{{ $loop->index + 1 }}</td>
+                <td>{{ $event->title }}</td>
+                <td>{{ count($event->users) }}</td>
+                <td>
+                    <a href="/eventos/{{ $event->id }}/editar" class="btn btn-info edit-btn">
+                        <ion-icon name="create-outline"></ion-icon> Editar
+                    </a>
+                    <form action="/eventos/{{ $event->id }}" method="POST">
+                        @csrf
+                        @method('DELETE') {{-- WE DO THIS TO TELL LARAVEL THAT THIS IS A DELETE REQUEST, AND NOT A POST --}}
+                        <input type="hidden" name="_method">
+                        <button type="submit" class="btn btn-danger delete-btn">
+                            <ion-icon name="trash-outline"></ion-icon> Deletar
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'Dashboard')
+
+@section('content')
+
+<div class="col-md-10 offset-md-1 dashboard-title-container">
+    <h1>Meus eventos</h1>
+</div>
+
+<div class="col-md-10 offset-md-1 dashboard-events-container">
+    @if(count($events) > 0)
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Participantes</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($eventsAsParticipant as $event)
+            <tr>
+                <td scope="row">{{ $loop->index + 1 }}</td>
+                <td>{{ $event->title }}</td>
+                <td>{{ count($event->users) }}</td>
+                <td>
+                    <a href="/eventos/{{ $event->id }}/editar" class="btn btn-info edit-btn">
+                        <ion-icon name="create-outline"></ion-icon> Editar
+                    </a>
+                    <form action="/eventos/{{ $event->id }}" method="POST">
+                        @csrf
+                        @method('DELETE') {{-- WE DO THIS TO TELL LARAVEL THAT THIS IS A DELETE REQUEST, AND NOT A POST --}}
+                        <input type="hidden" name="_method">
+                        <button type="submit" class="btn btn-danger delete-btn">
+                            <ion-icon name="trash-outline"></ion-icon> Deletar
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @else
+    <h2>Você não possui eventos cadastrados. <a href="/eventos/criar">Criar um novo evento.</a></h2>
+    @endif
+</div>
+
+@endsection
+
+
+
+
+
+
+
+
+
+AGORA PRECISAMOS A SEGUNDA PARTE DA TABLE,
+
+QUE É OS EVENTS QUE O USUÁRIO POSSUI...
+
+
+
+
+
+
+
+
+
+tudo está funcionando... só falta o link de 'sair do evento'...
+
+
+
+
+
+
+E A ROTA, TAMBÉM...
+
+
+
+
+
+
+
+
+
+
+-> MAS O PROFESSOR QUER CRIAR UMA MEDIDA DE SEGURANÇA..
+
+
+
+
+
+
+
+
+
+
+-_> É O EDIT DOS EVENTOS...
+
+
+
+
+
+
+
+
+
+-> ELE DEIXA EDITAR EVENTOS DE QUE NÃO SOMOS DONOS...
+
+
+
+
+
+
+
+-_> PRECISAMOS DE UMA BARREIRA DE SEGURANÇA PARA ISSO..
+
+
+
+
+
+
+
+
+--> LÁ NA ACTION DE EDIT,
+
+O RETURN DA VIEW,
+
+ESCREVEMOS ASSIM:
+
+
+
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $eventId)
+    {
+        $event = Event::findOrFail($eventId);
+
+        // Check if the user is the owner of the event:
+        if (Auth::user()->id != $event->user_id) {
+            return redirect('/')->with('msg', 'Você não pode editar este evento!');
+        }
+
+        return view('events.edit', ['event' => $event]);
+    }
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+ISSO VAI REDIRECIONAR O USER...
+
+
+
+
+
+
+
+
+
+
+
+COM ISSO, SÓ FALTOU A ROUTE DE 'LEAVE EVENT', para os participantes...

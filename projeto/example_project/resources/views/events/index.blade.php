@@ -1,4 +1,4 @@
-@extends('layouts.main')
+{{-- @extends('layouts.main')
 
 @section('title', 'HDC Events - Eventos')
 
@@ -12,4 +12,4 @@
 <p>{{ $event->city }}</p>
 @endforeach
 
-@endsection
+@endsection --}}

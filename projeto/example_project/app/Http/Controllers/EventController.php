@@ -98,9 +98,12 @@ class EventController extends Controller
     {
         $user = Auth::user();
 
-        $events = $user->eventsAsParticipant;
+        $eventsAsOwner = $user->events;
 
-        return view('events.dashboard', ['events' => $events]);
+
+        $eventsAsParticipant = $user->eventsAsParticipant;
+
+        return view('events.dashboard', ['eventsAsOwner' => $eventsAsOwner, 'eventsAsParticipant' => $eventsAsParticipant]);
     }
 
     /**
@@ -173,6 +176,9 @@ class EventController extends Controller
         if (Auth::user()->id != $event->user_id) {
             return redirect('/')->with('msg', 'Você não pode excluir este evento!');
         }
+
+        // Detach all users from the event
+        $event->users()->detach();
 
         $event->delete();
 

@@ -6,7 +6,7 @@
 
 <div id="create-event-container" class="col-md-6 offset-md-3">
     <h1>Editando: {{ $event->title }}</h1>
-    <form action="/eventos/update/{{ $event->id }}" method="POST" enctype="multipart/form-data">
+    <form action="/eventos/{{ $event->id }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <div class="form-group">
@@ -20,7 +20,7 @@
         </div>
         <div class="form-group">
             <label for="title">Data do Evento:</label>
-            <input type="date" class="form-control" id="date" name="date" value="{{ $event->date->format('Y-m-d') }}">
+            <input type="date" class="form-control" id="date" name="date" value="{{ date('Y-m-d', strtotime($event->date)) }}">
         </div>
 
         <div class="form-group">
@@ -36,7 +36,7 @@
         </div>
         <div class="form-group">
             <label for="description">Descrição:</label>
-            <textarea class="form-control" id="description" name="description" placeholder="Descrição do evento" value="{{ $event->description }}"></textarea>
+            <textarea class="form-control" id="description" name="description" placeholder="Descrição do evento" rows="5">{{ $event->description }}</textarea>
         </div>
         <div class="form-group">
             <label for="title">Adicione itens de infraestrutura:</label>

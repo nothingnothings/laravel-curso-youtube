@@ -20,7 +20,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($events as $event)
+            @foreach($eventsAsParticipant as $event)
             <tr>
                 <td scope="row">{{ $loop->index + 1 }}</td>
                 <td>{{ $event->title }}</td>
@@ -31,8 +31,7 @@
                     </a>
                     <form action="/eventos/{{ $event->id }}" method="POST">
                         @csrf
-                        @method('DELETE') {{-- WE DO THIS TO TELL LARAVEL THAT THIS IS A DELETE REQUEST, AND NOT A POST --}}
-                        <input type="hidden" name="_method">
+                        @method('DELETE')
                         <button type="submit" class="btn btn-danger delete-btn">
                             <ion-icon name="trash-outline"></ion-icon> Deletar
                         </button>
