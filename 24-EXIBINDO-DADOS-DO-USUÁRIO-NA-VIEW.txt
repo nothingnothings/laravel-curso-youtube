@@ -1,0 +1,217 @@
+
+
+
+
+
+
+
+
+
+
+
+
+--> OK... AGORA VAMOS APRENDER 
+
+    A ADICIONAR OS DADOS DO USUÁRO, DONO DO EVENTO,
+
+    LÁ NA VIEW DELE (no espaço que 
+    nomeia o dono do evento,
+
+    lá em 'show' de cada event...
+    )
+
+
+
+-> OU SEJA,
+
+VAMOS TIRAR 
+
+
+
+ESSA PARTE AQUI:
+
+
+
+
+
+            <p class="event-owner">
+                <ion-icon name="star-outline"></ion-icon> Dono do Evento:
+            </p>
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+ANTES DE MAIS NADA, TEMOS QUE IR ATÉ O CONTROLLER E VER QUEM É O DONO DO EVENTO,
+EM 'show':
+
+
+
+
+
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $eventId)
+    {
+
+        $event = Event::findOrFail($eventId);
+
+        return view('events.show', ['event' => $event]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> QUEREMOS ENCONTRAR O DONO DO EVENTO...
+
+
+
+    --> PARA ISSO,
+
+
+
+    PRECISAMOS 
+
+
+    RODAR 
+
+
+
+assim:
+
+
+
+
+
+
+$eventOwner = User::where('id', $event->user_id);
+
+
+
+
+
+
+
+
+
+AÍ TRANSFORMAMOS ESSE OBJECT EM ARRAY,
+
+
+E TAMBÉM USAMOS 'first()',
+para usar esse aí mesmo... não ter de procurar o banco inteiro..
+
+
+
+
+
+
+
+
+--> AÍ PODEMOS ESCREVER ASSIM:
+
+
+
+
+
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $eventId)
+    {
+
+        $event = Event::findOrFail($eventId);
+
+        $eventOwner = User::where('id', $event->user_id)->first()->toArray();
+
+        return view('events.show', ['event' => $event, 'eventOwner' => $eventOwner]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+AGORA SÓ PRECISAMOS RENDERIZAR ISSO LÁ NA VIEW...
+
+
+
+
+
+
+
+
+
+
+--> NA VIEW,
+
+
+
+ESCREVEMOS ASSIM:
+
+
+
+
+            <p class="event-owner">
+                <ion-icon name="star-outline"></ion-icon> {{ $eventOwner['name'] }}
+            </p>
+
+
+
+
+
+
+
+BASICAMENTE ACESSAMOS A CHAVE 'name', dentro de esse array...
+
+
+
+
+
+
+
+
+AGORA O NOME DO USUÁRIO QUE CRIOU O EVENTO APARECE NA PÁGINA...
