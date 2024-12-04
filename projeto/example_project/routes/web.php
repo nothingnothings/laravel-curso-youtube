@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EventController;
+use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -34,7 +35,10 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', function () {
-    return view('welcome');
+
+    $events = Event::all();
+
+    return view('welcome', ['events' => $events]);
 });
 
 Route::get('/eventos', [EventController::class, 'index']);

@@ -1,0 +1,865 @@
+
+
+
+
+
+
+
+SALVANDO JSON NO BANCO.
+
+
+
+
+
+
+
+
+
+--> PODEMOS SALVAR UM CONJUNTO DE DADOS NO BANCO,
+    ISSO PARA _ ITEMS __ DE MÚLTIPLA ESCOLHA...
+
+
+
+
+
+
+
+--> VAMOS CRIAR UM CAMPO DE TIPO 'JSON',
+    VIA MIGRATIONS...
+
+
+
+
+
+--> NO FRONT-END, PODEMOS UTILIZAR 
+    INPUTS COM __ CHECKBOX...
+
+
+
+
+
+
+
+
+--> APÓS O ENVIO PARA O CONTROLLER,
+    APENAS RECEBEMOS DO REQUEST OS ITEMS... E O RESTO 
+    DO PROCESSO É IGUAL AO DOS OUTROS DADOS DO NOSSO MODEL...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> MAS PQ PODEMOS USAR JSON?
+
+
+
+
+
+
+
+''PODEMOS FAZER O CONJUNTO DE CARACTERÍSTICAS DO OBJETO 'EVENTO'...''...
+
+
+
+
+
+EX:
+
+
+
+''SE O EVENTO TEM PALCO,
+SE TEM CERVEJA GRÁTIS,
+COMIDA GRÁTIS, ETC ETC''...
+
+
+
+
+
+
+
+
+
+
+-> É UM CASO PARA INSERIR DADOS DENTRO DO BANCO,
+    PARA QUE POSSAM RESGATADOS POSTERIORMENTE... PQ AÍ 
+    PODEMOS RETRIEVAR ESSES DADOS E EXIBÍ-LOS EM UMA LISTA,
+
+    NO HTML...
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> PRECISAMOS CRIAR 1 CAMPO DE JSON, NAS MIGRATIONS...
+
+
+
+
+
+
+
+
+
+
+
+-> NO FRONTEND, PODEMOS USAR 1 ESTRATÉGIA DE INPUTS COM 
+CHECKBOX...
+
+
+
+
+
+
+
+-> NO BACKEND, ESSES INPUTS SERÃO COMPREENDIDOS COMO JSON,
+    E ENTÃO SERÃO SALVOS NO BANCO...
+
+
+
+
+
+
+
+--> VAMOS CRIAR ESSE FIELD, COM UMA MIGRATION...
+
+
+
+
+
+
+
+
+
+-> BASICAMENTE, ESCREVEMOS ASSIM:
+
+
+
+
+
+
+
+
+
+
+php artisan make:migration add_characteristics_to_events_table 
+
+
+
+
+
+
+
+
+
+
+--> ou algo do gênero, pq vamos querer adicionar esse field 
+
+a nossa table...
+
+
+
+
+
+
+
+-> colocamos assim:
+
+
+php artisan make:migration add_items_to_events_table 
+
+
+
+
+
+
+
+
+
+
+
+
+
+E AÍ FICA ASSIM:
+
+
+
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('events', function (Blueprint $table) {
+            $table->json('items');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('events', function (Blueprint $table) {
+            $table->dropColumn('items');
+        });
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+AÍ RODAMOS 'php artisan migrate', 
+para aplicar essa mudança...
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project> php artisan migrate
+
+   INFO  Running migrations.  
+
+  2024_12_04_032034_add_image_to_events_table ................... 172.74ms DONE
+  2024_12_04_035011_add_items_to_events_table .................... 84.99ms DONE
+
+PS C:\Users\Usuario\Desktop\NOVAS NOVAS AULAS LARAVEL\projeto\example_project>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OK... AGORA PRECISAMOS EDITAR A VIEW,
+
+
+
+A PARTE DE 'create.blade.php',
+
+
+
+
+PARA QUE SEJA POSSÍVEL 
+
+
+
+
+ENVIAR DADOS JSON,
+
+POR MEIO DE 1 CHECKBOX...
+
+
+
+
+
+
+
+
+ADICIONAMOS UMA NOVA DIV DE 'form-group',
+
+
+TIPO ASSIM:
+
+
+
+
+        <div class="form-group">
+            <label for="title">Adicione itens de infraestrutura:</label>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Cadeiras">
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+OBS::: QUANDO ENVIAMOS UM _ ARRAY__ 
+
+    DE ITEMS,
+
+    
+
+    ITEMS COM VALUES DIFERENTES,
+
+    DEVEMOS ESCREVER SEMPRE 'name[]',
+
+
+    colocar o SÍMBOLO DO ARRAY, LOGO DEPOIS...
+
+
+
+
+
+
+
+--> SE VC ESCREVE ASSIM,
+    SEUS INPUTS SÃO ENVIADOS EM CONJUNTO, EM VEZ DE 1 POR VEZ..
+
+
+
+
+
+
+
+-> PODEMOS COLOCAR OUTRO FORM GROUP,
+
+NESSE MESMO ASSOC ARRAY,
+
+TIPO ASSIM:
+
+
+
+
+
+    <form action="/eventos" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="form-group">
+            <label for="image">Imagem do Evento:</label>
+            <input type="file" class="form-control-file" id="image" name="image">
+        </div>
+        <div class="form-group">
+            <label for="title">Evento:</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Título do evento">
+        </div>
+
+        <div class="form-group">
+            <label for="city">Cidade:</label>
+            <input type="text" class="form-control" id="city" name="city" placeholder="Cidade do evento">
+        </div>
+        <div class="form-group">
+            <label for="description">Descrição:</label>
+            <textarea class="form-control" id="description" name="description" placeholder="Descrição do evento"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="title">Adicione itens de infraestrutura:</label>
+            <div class="form-group">
+                <label for="items">Cadeiras</label>
+                <input type="checkbox" name="items[]" value="Cadeiras">
+            </div>
+            <div class="form-group">
+                <label for="items">Palco</label>
+                <input type="checkbox" name="items[]" value="Palco">
+            </div>
+            <div class="form-group">
+                <label for="items">Cerveja Grátis</label>
+                <input type="checkbox" name="items[]" value="Cerveja Grátis">
+            </div>
+            <div class="form-group">
+                <label for="items">Open Food</label>
+                <input type="checkbox" name="items[]" value="Open Food">
+            </div>
+            <div class="form-group">
+                <label for="is_private">É privado?</label>
+                <select class="form-control" id="is_private" name="is_private">
+                    <option value="0">Não</option>
+                    <option value="1">Sim</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Criar Evento</button>
+            </div>
+    </form>
+
+
+
+
+
+
+CERTO..
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events - Criar Evento')
+
+@section('content')
+
+<div id="create-event-container" class="col-md-6 offset-md-3">
+    <h1>Crie o seu evento</h1>
+    <form action="/eventos" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="form-group">
+            <label for="image">Imagem do Evento:</label>
+            <input type="file" class="form-control-file" id="image" name="image">
+        </div>
+        <div class="form-group">
+            <label for="title">Evento:</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Título do evento">
+        </div>
+
+        <div class="form-group">
+            <label for="city">Cidade:</label>
+            <input type="text" class="form-control" id="city" name="city" placeholder="Cidade do evento">
+        </div>
+        <div class="form-group">
+            <label for="description">Descrição:</label>
+            <textarea class="form-control" id="description" name="description" placeholder="Descrição do evento"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="is_private">O Evento é privado?</label>
+            <select class="form-control" id="is_private" name="is_private">
+                <option value="0">Não</option>
+                <option value="1">Sim</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="title">Adicione itens de infraestrutura:</label>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Cadeiras"> Cadeiras
+            </div>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Palco"> Palco
+            </div>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Cerveja Grátis"> Cerveja Grátis
+            </div>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Open Food"> Open Food
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Criar Evento</button>
+            </div>
+    </form>
+
+</div>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OK... AGORA TEMOS TODOS ESSES CHECKBOX...
+
+
+
+
+
+
+
+
+AGORA QUEREMOS SALVAR ISSO NO BANCO...
+
+
+
+
+
+
+
+
+
+
+--> PRECISAMOS ESPECIFICAR BEM NO CONTROLLER...
+
+
+
+
+
+
+
+
+
+
+--> PRECISAMOS TRATAR ESSES DADOS, NO CONTROLLER...
+
+
+
+
+--> VAMOS BASICAMENTE ADICIONAR 'items',
+
+
+COMO SE FOSSE OUTRA PROPRIEDADE A SER SALVA,
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $event = new Event();
+        $event->title = $request->title;
+        $event->city = $request->city;
+        $event->description = $request->description;
+        $event->is_private = $request->is_private;
+        $event->items = $request->items;
+
+
+
+
+
+
+
+
+
+
+
+
+ISSO JÁ VAI NOS PERMITIR SALVAR ESSES DADOS NO BANCO,
+
+NO FORMATO JSON...
+
+
+
+
+
+
+
+
+
+
+
+
+-> MAS É CLARO QUE ISSO NÃO BASTA...
+
+
+
+TEMOS QUE ESPECIFICAR QUE 
+
+
+''ESSES ITEMS NÃO VÃO VIR EM FORMATO STRING,
+
+E SIM VÃO VIR EM FORMATO ARRAY''....
+
+
+
+
+
+
+
+
+
+-> ISSO É PQ _ O FORMULÁRIO VAI ENVIAR UMA STRING...
+
+
+-> SE O LARAVEL RECEBER COMO STRING, ELE VAI TENTAR 
+    SALVAR NO BANCO COMO STRING...
+
+
+
+-> É POR ISSO QUE PRECISAMOS 
+    FAZER UM __ CAST__ DOS 'items',
+
+
+    essa propriedade aí,
+
+
+    COMO _ ARRAY...
+
+
+
+
+
+
+    -> PARA FAZER UM _ CAST, PRECISAMOS FAZER UMA ALTERAÇÃO 
+
+    NO __ PRÓPRIO __ MODEL__ DO 'events'...
+
+
+
+
+
+
+
+
+--> OK, MAS COMO FAZEMOS ISSO?
+
+
+
+
+
+
+
+-> DEVEMOS ESCREVER UM CAST, LÁ EM 'Event.php',
+
+NO MODEL...
+
+
+
+
+
+
+
+
+-> CAST -> É UMA SYNTAX ESPECIAL DO LARAVEL...
+
+
+
+
+
+
+
+--> PARA ISSO, PRECISAMOS DA PROPERTY 
+
+
+'protected $casts',
+
+DO LARAVEL,
+
+E AÍ 
+
+
+DEVEMOS COLOCAR COMO DEVE SER CASTADO ESSE FIELD DE 'items'...
+
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Event extends Model
+{
+    protected $casts = ['items' => 'array']; // Make it so that items, which are sent as strings by the frontend,
+}
+
+
+
+
+
+
+
+
+
+
+OK, MAS COMO ISSO FICOU, NO BANCO?
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> FICOU SALVO COMO __ UM ARRAY...
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+["Cadeiras", "Palco", "Open Food"];
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> OK... MAS AINDA TEMOS QUE EXIBIR ESSA INFO,
+
+LÁ NA VIEW DO EVENTO SINGULAR,
+
+DA VIEW show.blade.php...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> É POR ISSO QUE ESCREVEMOS TIPO ASSIM:
+
+
+
+
+
+
+            <h3>O evento conta com:</h3>
+            <ul class="event-items">
+                @foreach($event->items as $item)
+                <li>{{ $item }}</li>
+                @endforeach
+            </ul>
+
+
+
+
+
+
+
+
+
+
+        COLOCAMOS UM ÍCONE, TAMBÉM:
+
+
+
+
+
+            <h3>O evento conta com:</h3>
+            <ul class="event-items">
+                @foreach($event->items as $item)
+                <li>
+                    <ion-icon name="play-outline"></ion-icon> <span>{{ $item }}</span>
+                </li>
+                @endforeach
+            </ul>
+
+
+
+
+
+
+
+
+
+
+
+    OK... COM ISSO, CONSEGUIMOS EXIBIR ESSES ITEMS, NO HTML...
+
+
+
+
+
+
+
+
+
+É ASSIM QUE SALVAMOS JSON NO LARAVEL, NO BANCO... E É ASSIM QUE 
+
+DEVOLVEMOS PARA O CLIENTE,
+
+
+NO FRONTEND...
