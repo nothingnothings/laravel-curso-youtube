@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
@@ -68,6 +69,11 @@ class EventController extends Controller
             // * This will save the file in the database.
             $event->image = $imageName;
         }
+
+        // * Add user_id value to the new event record, establishing the relationship between the event and the user.
+        $user = Auth::user();
+
+        $event->user_id = $user->id;
 
         $event->save();
 

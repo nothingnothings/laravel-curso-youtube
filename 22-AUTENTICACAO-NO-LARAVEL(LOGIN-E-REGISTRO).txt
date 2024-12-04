@@ -1034,3 +1034,10 @@ AÍ ESCREVEMOS ASSIM:
 
 
             AÍ FUNCIONA O LOGIN E LOGOUT...
+
+
+
+
+
+
+            O JETSTREAM SUGERE ESSE LAYOUT DE LOGOUT (se fôssemos usar os templates dele)...s

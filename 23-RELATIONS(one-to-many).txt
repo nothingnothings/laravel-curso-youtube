@@ -1,0 +1,721 @@
+
+
+
+
+
+
+
+--> RELATIONS SÃO ESSENCIAIS PARA BANCOS DE DADOS RELACIONAIS 
+
+
+
+
+
+
+-> VAMOS CRIAR UMA RELAÇÃO DE UM PARA MUITOS,
+    ENTRE USUÁRIO E EVENTOS...
+
+
+
+
+
+
+
+
+--> ISSO TORNARÁ UM USUÁRIO O DONO DE UM EVENTO,
+    E TAMBÉM CRIARÁ A POSSIBILIDADE DE ELE POSSUIR VÁRIOS EVENTOS...
+
+
+
+
+
+
+
+
+
+-> PRECISAREMOS ALTERAR AS MIGRATIONS, ADICIONANDO UMA CHAVE ESTRANGEIRA 
+    NO MODEL 'Event'...
+
+
+
+
+
+
+many-to-many --> 1 usuário pode participar de múltiplos eventos,
+                e 1 evento pode ter múltiplos usuários... (participants)...
+
+
+
+
+
+
+
+
+
+
+
+--> DEPOIS VAMOS PODER EDITAR EVENTOS E DELETAR EVENTOS...
+
+
+
+
+
+
+
+
+
+-> para isso, vamos criar 1 nova migration,
+
+    com php artisan make:migration 
+
+
+
+
+
+
+
+
+
+
+AÍ ESCREVEMOS
+
+php artisan make:migration add_user_id_to_events_table
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ex:
+
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('events', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('events', function (Blueprint $table) {
+            //
+        });
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AÍ COLOCAMOS 'constrained()',
+
+para vincular essa column a 1 user de uma outra table, table de 'users'..
+
+
+
+
+
+
+
+no down,
+escrevemos assim:
+
+
+
+
+
+
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('events', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('events', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        });
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+NO MODEL DE EVENTS, POR FIM,
+
+PRECISAMOS ADICIONAR ESSA RELATION,
+
+
+COM UMA FUNCTION DE 'users',
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Event extends Model
+{
+    // * This wil get saved as '[ "Cadeiras", "Palco", "Cerveja Grátis", "Open Food" ]' in the database, in the 'items' field.
+    protected $casts = ['items' => 'array']; // Make it so that items, which are sent as strings by the frontend, are saved as an array in the database.
+
+    protected $dates = ['date']; // This will make it so that fields passed to the 'date' field are considered as 'dateTime' data type...
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ISSO SERÁ ASSIM PQ 1 EVENT VAI SEMPRE PERTENCER A APENAS 1 ÚNICO USUÁRIo...
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+
+--> AÍ, LÁ EM 'User',
+
+FAZEMOS O CONTRÁRIO,
+
+TIPO ASSIM:
+
+
+
+
+
+
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> MAS COLOCAMOS 'hasMany',
+
+
+PQ ELE TEM MUITOS EVENTS..
+
+
+
+MTOs records de 'event' terão 
+o campo de 
+
+'user_id'...
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+ESSA É UMA FUNCIONALIDADE MT BOA DO LARAVEL...
+
+
+
+
+
+--> DEPOIS DISSO, DEVEMOS tentar rodar 
+
+
+
+
+php artisan migrate,
+
+
+
+
+mas isso nos dá um erro...
+
+
+
+
+
+
+
+
+
+
+
+-> PARA ACABAR COM ESSE ERRO,
+
+escrevemos 
+
+
+
+'php artisan migrate:fresh'...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+--> AGORA, SEMPRE QUE CRIARMOS 1 EVENT,
+    DEVEMOS ADICIONAR O VALUE DA COLUMN DO 'user_id',
+
+
+
+    POR ISSO PRECISAMOS EDITAR A ACTION DE 'store()"
+
+    do eventController,
+
+
+
+
+
+
+    E USAR O METHOD 'auth()',
+
+    PARA RETRIEVAR O VALUE DE 'user()',
+
+    QUE SERÁ O USUÁRIO LOGGADO...
+
+
+
+
+    PARA ISSO, ESCREVEMOS ASSIM:
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $event = new Event();
+        $event->title = $request->title;
+        $event->date = $request->date; // Check model for more details (protected $dates = ['date']);
+        $event->city = $request->city;
+        $event->description = $request->description;
+        $event->is_private = $request->is_private;
+        $event->items = $request->items; // Check model for more details (protected $casts = ['items' => 'array'];);
+
+
+        // * Image Upload
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+
+            $requestImage = $request->image;
+
+            // $requestImage->store('public/img/events'); // * This is the easy way to do it, but we want to have unique names for each img file.
+
+            $extension = $requestImage->extension();
+
+            // * This name is used for storing it in the database, and also for saving in a folder.
+            $imageName = md5($requestImage->getClientOriginalName() . strtotime("now")) . "." . $extension;
+
+            // * This will save the file in the folder.
+            $requestImage->move('img/events', $imageName);
+
+            // * This will save the file in the database.
+            $event->image = $imageName;
+        }
+
+        // * Add user_id value to the new event record, establishing the relationship between the event and the user.
+
+        $user = Auth::user();
+
+        $event->user_id = $user->id;
+
+        $event->save();
+
+        return redirect('/')->with('msg', 'Event created successfully!'); // We redirect, and also FLASH A MESSAGE TO THE USER. This message is acessed with '@session', in the blade files.
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO... O PROFESSOR ENTÃO DIZ QUE TEMOS 1 NOVO PROBLEMA...
+
+
+
+
+
+
+
+
+-> O PROBLEMA É QUE _ PODEMOS _ ACESSAR A VIEW DE 'create Event'
+
+
+MESMO QUANDO ESTAMOS DESLOGGADOS...
+
+
+
+
+
+
+--> PARA CONSERTAR ISSO, PRECISAMOS __ PASSAR__ 1 PARAMETER,
+
+NAS ROUTES, PARA 
+
+ 
+QUE 
+
+''WE CAN ONLY ACCESS THESE ROUTES IF WE ARE LOGGED IN''...
+
+
+
+
+
+
+--> PARA ISSO, VAMOS PRECISAR DO MIDDLEWARE DE 'auth()',
+
+
+provavelmente...
+
+
+
+
+
+
+
+
+
+
+
+
+--> LÁ NO WEB.PHP, ESTAMOS COM 1 CÓDIGO ASSIM:
+
+
+
+
+
+
+
+
+
+
+
+Route::get('/', function () {
+
+
+    $search = request('search'); // * this utilizes the url's query parameters. GET request in the form.
+
+    // * Used with the search form.
+    if ($search) {
+        $events = Event::where(['title', 'LIKE', '%' . $search . '%'])->get();
+    } else {
+        $events = Event::all();
+    }
+
+
+    return view('welcome', ['events' => $events, 'search' => $search]);
+});
+
+Route::get('/eventos', [EventController::class, 'index']);
+Route::get('/eventos/criar', [EventController::class, 'create']);
+Route::get('/eventos/{id}', [EventController::class, 'show']);
+Route::get('/eventos/{id}/editar', [EventController::class, 'edit']);
+Route::post('/eventos', [EventController::class, 'store']);
+Route::put('/eventos/{id}', [EventController::class, 'update']);
+Route::delete('/eventos/{id}', [EventController::class, 'destroy']);
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> BASICAMENTE,
+
+PRECISAMOS ADICIONAR UM __ ->middleware(),
+
+
+
+QUE VAI AGIR ENTRE A AÇÃO DE CLICAR NO LINK do get do 'create'...
+
+
+
+
+
+
+-> AÍ ESCREVEMOS TIPO 
+
+
+->middleware('auth)',
+
+
+PARA ADICIONAR ESSE MIDDLEWARE DE 'auth'...
+
+
+
+
+
+
+
+
+
+Ex:
+
+
+
+
+
+
+Route::get('/eventos/criar', [EventController::class, 'create'])->middleware('auth');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+COM ISSO, APENAS CONSEGUIMOS ACESSAR ESSA VIEW SE ESTIVERMOS LOGGED IN...
+
+
+
+
+
+
+
+
+
+
+
+DEVEMOS FAZER A MESMA COISA COM AS OUTRAS ROUTES,
+
+
+DEIXAR 'login' e 'register' com o middleware de '->guest()',
+
+
+
+Para que sejam bloqueados os users já com auth...
+
+
+
+
+
+
+
+
+
+_> mas isso já é feito automaticamente, pelo laravel sanctum...
+
+
+
+
+
+
+
+
+
+faça assim se vc quer ser sempre redirecionado para 
+
+a tela de login,
+
+se não estiver auth:
+
+
+
+
+
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/', function () {
+
+        $events = Event::all();
+
+        $search = request('search');
+
+        return view('welcome', ['events' => $events, 'search' => $search]);
+    })->name('dashboard');
+});
