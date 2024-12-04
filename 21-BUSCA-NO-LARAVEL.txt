@@ -1,0 +1,563 @@
+
+
+
+
+
+
+
+-> PARA CRIAR UMA BUSCA NO LARAVEL É MUITO SIMPLES, VAMOS UTILIZAR O __ ELOQUENT__...
+
+
+
+
+--> O MÉTODO 'WHERE()' VAI IDENTIFICAR OS REGISTROS QUE PRECISAMOS,
+    FAZENDO UM FILTRO E NOS ENVIANDO PARA A VIEW...
+
+
+
+
+
+
+-> PODEMOS FAZER A EXIBIÇÃO DAS BUSCAS NA PRÓPRIA HOME,
+    MUDANDO O LAYOUT COM BLADE DIRECTIVES...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> PARA ISSO, PROVAVELMENTE PRECISAMOS DE UMA ROUTE DE 'GET'...
+
+
+
+
+
+
+
+-> PRECISAMOS DE 1 QUERY 
+    QUE FAÇA 1 PESQUISA NO BANCO...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+VAMOS ATÉ welcome.blade.php...
+
+
+
+
+
+
+
+AÍ TEMOS UMA FORM COM UMA ACTION VAZIA, TIPO ASSIM:
+
+
+
+
+
+
+
+<div id="search-container" class="col-md-12">
+    <h1>Busque um evento</h1>
+    <form action="/">
+        <input type="text" id="search" name="search" class="form-control" placeholder="Procurar...">
+    </form>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> QUANDO ESTAMOS PROCURANDO ALGO NO BANCO,
+    VAMOS USAR O METHOD 'get',
+
+    POR ISSO DEIXAMOS ASSIM:
+
+
+
+
+
+    <div id="search-container" class="col-md-12">
+    <h1>Busque um evento</h1>
+    <form action="/" method="GET">
+        <input type="text" id="search" name="search" class="form-control" placeholder="Procurar...">
+    </form>
+</div>
+
+
+
+
+
+
+certo...
+
+
+
+
+
+
+
+
+
+
+
+É melhor colocar um um button de type submit, nesse search,
+para fazer o submit, em vez de deixar apenas com o 'enter'...
+
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+<div id="search-container" class="col-md-12">
+    <h1>Busque um evento</h1>
+    <form action="/" method="GET">
+        <input type="text" id="search" name="search" class="form-control" placeholder="Procurar...">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </form>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+ISSO FEITO, 
+
+PRECISAMOS VERIFICAR A LÓGICA DO CONTROLLER,
+
+DO 'EventController',
+
+
+PARA REALIZAR ESSA BUSCA...
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> teremos um input com nome de 'search'
+
+que deverá vir no controller....
+
+
+
+
+
+
+
+--> AÍ ESCREVEMOS ASSIM:
+
+
+
+
+
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        // * Example of model usage:
+        $events = Event::all();
+
+
+        return view('events.index', ['events' => $events]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+INICIALMENTE, DEVEREMOS TIRAR ESSE 'Event::all()',
+
+
+
+
+PQ AGORA VAMOS QUERER 
+
+
+
+
+BUSCAR PELO parâmetro 'search',
+dentro do request...
+
+
+
+
+
+
+
+fazemos isso tipo assim:
+
+
+
+
+
+
+
+
+
+
+class EventController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        // * Example of model usage:
+        // $events = Event::all();
+
+        $search = request('search');
+
+        if ($search) {
+            $events = Event::where('title', 'LIKE', '%' . $search . '%')->get();
+        } else {
+            $events = Event::all();
+        }
+
+
+        return view('events.index', ['events' => $events]);
+    }
+
+
+
+
+
+
+
+
+
+isso vai procurar por todos os events LIKE esse parâmetro aí...
+
+
+
+
+
+
+
+
+OK... MAS O PROFESSOR FAZ DE 1 MANEIRA DIFERENTE... ELE COLOCA 1 ARRAY DENTRO DESSE 
+ARRAY... ISSO PQ, MAIS TARDE,
+FAREMOS A LÓGICA DOS EVENTOS 'privados', o que quer dizer que vamos precisar outro 
+parameter, de evento privado... outra clause, basicamente...
+
+
+
+
+
+
+EX:
+
+
+
+
+class EventController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        // * Example of model usage:
+        // $events = Event::all();
+
+        $search = request('search');
+
+        // * Used with the search form.
+        if ($search) {
+            $events = Event::where(['title', 'LIKE', '%' . $search . '%'])->get();
+        } else {
+            $events = Event::all();
+        }
+
+
+        return view('events.index', ['events' => $events]);
+    }
+
+
+
+
+
+
+
+
+
+
+ex:
+
+
+
+
+
+
+
+
+class EventController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        // * Example of model usage:
+        // $events = Event::all();
+
+        $search = request('search');
+
+        // * Used with the search form.
+        if ($search) {
+            $events = Event::where(['title', 'LIKE', '%' . $search . '%'])->get();
+        } else {
+            $events = Event::all();
+        }
+
+
+        return view('events.index', ['events' => $events, 'search' => $search]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+no return da  view,
+
+
+
+fazemos return dos events adequados,
+
+e também do próprio 'search',
+
+
+para poder exibir que 
+
+
+''estamos procurando por XXXXX''...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> agora precisamos ir até o welcome.blade.php,
+
+
+
+
+
+
+
+
+e aí testar... e funcionou... estamos filtrando 
+
+os eventos, na busca...
+
+
+
+
+
+
+
+
+
+MAS ISSO ESTÁ MT PARECIDO COM A VIEW DE HOME...
+
+
+
+
+
+
+
+
+-> PRECISAMOS ADAPTAR A VIEW DE 'welcome.blade.php',
+
+
+PARA MOSTRAR QUE ESTAMOS FAZENDO 1 BUSCA...
+
+
+
+
+USAREMS UMA DIRECTIVE DE '@if', checando por '$search',
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+
+
+<div id="events-container" class="col-md-12">
+    @if($search)
+    <h2>Buscando por: {{ $search }}</h2>
+    @else
+    <h2>Próximos Eventos</h2>
+    <p>Veja os eventos dos próximos dias:</p>
+    @endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO... ISSO JÁ MELHORA A EXPERIÊNCIA DO USUÁRIO...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> PODEMOS MELHORAR TAMBÉM A PARTE DE 'Não há eventos disponíveis'...
+
+
+
+
+
+
+
+-> PODEMOS MELHORAR ESSA MENSAGEM DE RETORNO AO USUÁRIO,
+    TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+        @if(count($events) == 0 && $search)
+        <div class="col-md-12">
+            <h2>Não foi possível encontrar nenhum evento com {{ $search }}.</h2>
+            <a href="/">Ver todos eventos.</a>
+        </div>
+        @else
+        <div class="col-md-12">
+            <h2>Não há eventos disponíveis.</h2>
+        </div>
+        @endif
+
+
+
+
+
+
+
+    COM ISSO, CONSEGUIMOS FILTRAR OS EVENTS, POR ALGUM ATTRIBUTO...
+
+
+
+
+
+
+
+
+    BASICAMENTE, ESTAMOS USANDO O QUERY PARAMETERS (para fazer o get, para colocar lá no 'request('search')'....)

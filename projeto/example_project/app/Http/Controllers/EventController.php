@@ -13,10 +13,19 @@ class EventController extends Controller
     public function index()
     {
         // * Example of model usage:
-        $events = Event::all();
+        // $events = Event::all();
+
+        $search = request('search'); // * this utilizes the url's query parameters. GET request in the form.
+
+        // * Used with the search form.
+        if ($search) {
+            $events = Event::where(['title', 'LIKE', '%' . $search . '%'])->get();
+        } else {
+            $events = Event::all();
+        }
 
 
-        return view('events.index', ['events' => $events]);
+        return view('events.index', ['events' => $events, 'search' => $search]);
     }
 
     /**
