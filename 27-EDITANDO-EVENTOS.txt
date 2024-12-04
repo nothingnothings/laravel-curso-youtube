@@ -1,0 +1,1024 @@
+
+
+
+
+
+
+
+VAMOS FAZER A LÓGICA DE EDITAR UM REGISTRO...
+
+
+
+
+
+
+--> PRECISAREMOS CRIAR UMA NOVA ROTA E TAMBÉM A __ VIEW__ QUE MOSTRA 
+
+O FORM 
+
+COM OS DADOS PREENCHIDOS..
+
+
+
+
+
+--> ALÉM DISSO, SERÁ NECESSÁRIO APLICAR UM OUTRO VERBO HTTP,
+    O 'PUT'...
+
+
+
+
+--> E PRECISAMOS PERSISTIR TODAS AS ALTERAÇÕES, POR MEIO 
+DE UMA ACTION NO NOSSO CONTROLLER...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--> COMEÇAMOS COM AS ROUTES...
+
+
+
+
+
+-> FICAMOS TIPO ASSIM:
+
+
+
+
+
+Route::get('/eventos/{id}/editar', [EventController::class, 'edit']);
+Route::put('/eventos/{id}', [EventController::class, 'update']);
+
+
+
+
+
+
+
+
+
+--> PRECISAMOS COLOCAR o ->middleware('auth') na maior parte das routes,
+
+tipo assim:
+
+
+
+
+
+
+
+
+
+Route::get('/eventos/criar', [EventController::class, 'create'])->middleware('auth');
+Route::get('/eventos/{id}', [EventController::class, 'show']);
+Route::get('/eventos/{id}/editar', [EventController::class, 'edit'])->middleware('auth'); // * This route is used to edit an event.
+Route::put('/eventos/{id}', [EventController::class, 'update'])->middleware('auth'); // * This route is used to update an event.
+Route::post('/eventos', [EventController::class, 'store']);
+
+Route::delete('/eventos/{id}', [EventController::class, 'destroy'])->middleware('auth');
+
+Route::get('/dashboard', [EventController::class, 'dashboard'])->middleware('auth');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+certo... agora precisamos criar a action, no controller...
+
+
+
+
+
+
+
+
+
+
+
+-> ESCREVEMOS TIPO ASSIM:
+
+
+
+
+
+
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Event $event)
+    {
+        return view('events.edit');
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> MAS, ANTES DISSO, PRECISAMOS DOS DADOS DO EVENT...
+
+
+
+
+
+-> PODEMOS PEGAR ESSA DATA TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $eventId)
+    {
+        $event = Event::findOrFail($eventId);
+
+        return view('events.edit', ['event' => $event]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OK, ISSO VAI ENVIAR A DATA DO EVENT... 
+
+MAS É BOM CHECAR SE O USER É REALMENTE RESPONSÁVEL POR ESSE EVENT...
+
+
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $eventId)
+    {
+        $event = Event::findOrFail($eventId);
+
+        // Check if the user is the owner of the event:
+        if (Auth::user()->id != $event->user_id) {
+            return redirect('/')->with('msg', 'Você não pode editar este evento!');
+        }
+
+        return view('events.edit', ['event' => $event]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO... NA VIEW DE 'edit.blade.php',
+
+
+ESCREVEMOS TIPO ASSIM:
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'Editando: ' . $event->title)
+
+@section('content')
+
+<div id="create-event-container" class="col-md-6 offset-md-3">
+    <h1>Edite o seu evento</h1>
+    <form action="/eventos" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+
+
+
+
+
+
+
+
+
+
+
+COMEÇAMOS COM ISSO...
+
+
+
+
+AÍ CONTINUAMOS ASSIM:
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'Editando: ' . $event->title)
+
+@section('content')
+
+<div id="create-event-container" class="col-md-6 offset-md-3">
+    <h1>Editando: {{ $event->title }}</h1>
+    <form action="/eventos/update/{{ $event->id }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+MANTEMOS O MULTIPART/FORM-DATA, 
+
+PQ VAMOS PODER 
+
+
+
+ENVIAR ARQUIVOS TBM...
+
+
+
+
+
+
+
+--> AGORA VAMOS FAZER 1 PREVIEW DA IMAGE QUE JÁ ESTÁ NO EVENT,
+    PARA ELA PODER VER QUAL IMAGE JÁ ESTÁ REGISTRADA 
+
+    NO EVENT...
+
+
+
+
+
+-> para isso, colocamos uma img src,
+
+
+
+e aí tipo assim:
+
+
+
+
+
+
+
+        <div class="form-group">
+            <label for="image">Imagem do Evento:</label>
+            <input type="file" class="form-control-file" id="image" name="image">
+            <img src="/img/events/{{ $event->image }}" class="img-fluid" alt="Evento {{ $event->title }}">
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+AÍ, EM CADA INPUT FIELD,
+
+PODEMOS COLOCAR 'value'
+
+
+COMO O VALUE QUE JÁ FOI PASSADO DO BACKEND,
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'Editando: ' . $event->title)
+
+@section('content')
+
+<div id="create-event-container" class="col-md-6 offset-md-3">
+    <h1>Editando: {{ $event->title }}</h1>
+    <form action="/eventos/update/{{ $event->id }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+        <div class="form-group">
+            <label for="image">Imagem do Evento:</label>
+            <input type="file" class="form-control-file" id="image" name="image">
+            <img src="/img/events/{{ $event->image }}" class="img-fluid" alt="Evento {{ $event->title }}">
+        </div>
+        <div class="form-group">
+            <label for="title">Evento:</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Título do evento" value="{{ $event->title }}">
+        </div>
+        <div class="form-group">
+            <label for="title">Data do Evento:</label>
+            <input type="date" class="form-control" id="date" name="date" value="{{ date('d/m/Y', strtotime($event->date)) }}">
+        </div>
+
+        <div class="form-group">
+            <label for="city">Cidade:</label>
+            <input type="text" class="form-control" id="city" name="city" placeholder="Cidade do evento" value="{{ $event->city }}">
+        </div>
+        <div class="form-group">
+            <label for="is_private">O Evento é privado?</label>
+            <select class="form-control" id="is_private" name="is_private">
+                <option value="0">Não</option>
+                <option value="1">Sim</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="description">Descrição:</label>
+            <textarea class="form-control" id="description" name="description" placeholder="Descrição do evento" value="{{ $event->description }}"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="title">Adicione itens de infraestrutura:</label>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Cadeiras"> Cadeiras
+            </div>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Palco"> Palco
+            </div>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Cerveja Grátis"> Cerveja Grátis
+            </div>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Open Food"> Open Food
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Criar Evento</button>
+            </div>
+    </form>
+
+</div>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+certo...
+
+
+
+
+
+
+A DATE FICA TIPO ASSIM:
+
+
+
+
+
+
+
+
+        <div class="form-group">
+            <label for="title">Data do Evento:</label>
+            <input type="date" class="form-control" id="date" name="date" value="{{ date('d/m/Y', strtotime($event->date)) }}">
+        </div>
+
+
+
+
+
+
+
+
+-> mas o professor escreveu tipo assim:
+
+
+
+
+$event->date->format('Y-m-d')
+
+
+
+
+
+
+
+
+
+A QUESTÃO É ESTE:
+
+
+
+
+
+
+        <div class="form-group">
+            <label for="is_private">O Evento é privado?</label>
+            <select class="form-control" id="is_private" name="is_private">
+                <option value="0">Não</option>
+                <option value="1">Sim</option>
+            </select>
+        </div>
+
+
+
+
+
+
+
+
+
+-> VAMOS PRECISAR DE UMA TERNARY EXPRESSION, NAS 2 OPTIONS...
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+        <div class="form-group">
+            <label for="is_private">O Evento é privado?</label>
+            <select class="form-control" id="is_private" name="is_private">
+                <option value="0" {{ $event->is_private == 0 ? 'selected' : '' }}>Não</option>
+                <option value="1" {{ $event->is_private == 1 ? 'selected' : '' }}>Sim</option>
+            </select>
+        </div>
+
+
+
+    
+
+
+
+CERTO... É UMA GAMBIARRA BEM INTERESSANTE...
+
+
+
+
+
+
+
+
+
+
+FICOU TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'Editando: ' . $event->title)
+
+@section('content')
+
+<div id="create-event-container" class="col-md-6 offset-md-3">
+    <h1>Editando: {{ $event->title }}</h1>
+    <form action="/eventos/update/{{ $event->id }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+        <div class="form-group">
+            <label for="image">Imagem do Evento:</label>
+            <input type="file" class="form-control-file" id="image" name="image">
+            <img src="/img/events/{{ $event->image }}" class="img-fluid" alt="Evento {{ $event->title }}">
+        </div>
+        <div class="form-group">
+            <label for="title">Evento:</label>
+            <input type="text" class="form-control" id="title" name="title" placeholder="Título do evento" value="{{ $event->title }}">
+        </div>
+        <div class="form-group">
+            <label for="title">Data do Evento:</label>
+            <input type="date" class="form-control" id="date" name="date" value="{{ $event->date->format('Y-m-d') }}">
+        </div>
+
+        <div class="form-group">
+            <label for="city">Cidade:</label>
+            <input type="text" class="form-control" id="city" name="city" placeholder="Cidade do evento" value="{{ $event->city }}">
+        </div>
+        <div class="form-group">
+            <label for="is_private">O Evento é privado?</label>
+            <select class="form-control" id="is_private" name="is_private">
+                <option value="0" {{ $event->is_private == 0 ? 'selected' : '' }}>Não</option>
+                <option value="1" {{ $event->is_private == 1 ? 'selected' : '' }}>Sim</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="description">Descrição:</label>
+            <textarea class="form-control" id="description" name="description" placeholder="Descrição do evento" value="{{ $event->description }}"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="title">Adicione itens de infraestrutura:</label>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Cadeiras"> Cadeiras
+            </div>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Palco"> Palco
+            </div>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Cerveja Grátis"> Cerveja Grátis
+            </div>
+            <div class="form-group">
+                <input type="checkbox" name="items[]" value="Open Food"> Open Food
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Criar Evento</button>
+    </form>
+
+</div>
+
+@endsection
+
+
+
+
+
+
+
+
+
+
+
+
+
+AGORA PRECISAMOS DA PARTE DE UPDATE,
+
+
+NO BANCO DE DADOS, COM O CONTROLLER...
+
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $eventId)
+    {
+
+        $event = Event::findOrFail($eventId);
+
+        // Check if the user is the owner of the event:
+        if (Auth::user()->id != $event->user_id) {
+            return redirect('/')->with('msg', 'Você não pode editar este evento!');
+        }
+
+        $event->title = $request->title;
+        $event->date = $request->date;
+        $event->city = $request->city;
+        $event->description = $request->description;
+        $event->is_private = $request->is_private;
+        $event->items = $request->items;
+
+        $event->save();
+
+        return redirect('/dashboard')->with('msg', 'Evento atualizado com sucesso!');
+    }
+
+
+
+
+
+
+
+
+
+MAS ESTÁ FALTANDO A IMAGE...
+
+
+
+
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $eventId)
+    {
+
+        $event = Event::findOrFail($eventId);
+
+        // Check if the user is the owner of the event:
+        if (Auth::user()->id != $event->user_id) {
+            return redirect('/')->with('msg', 'Você não pode editar este evento!');
+        }
+
+        $event->title = $request->title;
+        $event->date = $request->date;
+        $event->city = $request->city;
+        $event->description = $request->description;
+        $event->is_private = $request->is_private;
+        $event->items = $request->items;
+
+        // * Image Upload
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+
+            $requestImage = $request->image;
+
+            // $requestImage->store('public/img/events'); // * This is the easy way to do it, but we want to have unique names for each img file.
+
+            $extension = $requestImage->extension();
+
+            // * This name is used for storing it in the database, and also for saving in a folder.
+            $imageName = md5($requestImage->getClientOriginalName() . strtotime("now")) . "." . $extension;
+
+            // * This will save the file in the folder.
+            $requestImage->move('img/events', $imageName);
+
+            // * This will save the file in the database.
+            $event->image = $imageName;
+        }
+
+        $event->save();
+
+        return redirect('/dashboard')->with('msg', 'Evento atualizado com sucesso!');
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+MAS O PROFESSOR OBTEVE 1 ERROR:
+
+
+
+
+'Add [_token] to fillable property to allow mass assignment on [App\Models\Event]'
+
+
+
+
+
+
+
+
+--> O ERRO DELE FOI CAUSADO POR '$request->all()'...
+
+
+
+
+
+
+
+
+
+
+--> para consertar esse error,
+
+ele foi até o MODEL DO EVENT E ADICIONOU A 
+
+PROPRIEDADE 
+
+'protected $guarded = [];'...
+
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Event extends Model
+{
+    // * This wil get saved as '[ "Cadeiras", "Palco", "Cerveja Grátis", "Open Food" ]' in the database, in the 'items' field.
+    protected $casts = ['items' => 'array']; // Make it so that items, which are sent as strings by the frontend, are saved as an array in the database.
+
+    protected $dates = ['date']; // This will make it so that fields passed to the 'date' field are considered as 'dateTime' data type...
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    protected $guarded = [];
+}
+
+
+
+
+
+
+
+
+
+
+
+ISSO BASICAMNETE DIZ 
+
+
+''TUDO QUE FOR ENVIADO PELO POST PODE SER ATUALIZADO,
+    NÃO HÁ RESTRIÇÃO ALGUMA''...
+
+
+
+    (isso foi visto no outro curso)...
+
+
+
+
+
+
+
+
+
+
+
+-> O PROBLEMA FICOU COM 1 PROBLEMA NO UPDATE DA IMAGE...
+
+    ISSO É PQ NÃO COLOCAMOS A LÓGICA DE UPLOAD DE IMAGES,
+
+    NESSE 
+
+
+
+    'update()'...
+
+
+
+
+
+
+    --> O PROFESSOR DUPLICOU A LÓGICA DE IMAGE,
+
+    LÁ DO CREATE...
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $eventId)
+    {
+
+        $event = Event::findOrFail($eventId);
+
+        // Check if the user is the owner of the event:
+        if (Auth::user()->id != $event->user_id) {
+            return redirect('/')->with('msg', 'Você não pode editar este evento!');
+        }
+
+        $event->title = $request->title;
+        $event->date = $request->date;
+        $event->city = $request->city;
+        $event->description = $request->description;
+        $event->is_private = $request->is_private;
+        $event->items = $request->items;
+
+        // * Image Upload
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+
+            $requestImage = $request->image;
+
+            // $requestImage->store('public/img/events'); // * This is the easy way to do it, but we want to have unique names for each img file.
+
+            $extension = $requestImage->extension();
+
+            // * This name is used for storing it in the database, and also for saving in a folder.
+            $imageName = md5($requestImage->getClientOriginalName() . strtotime("now")) . "." . $extension;
+
+            // * This will save the file in the folder.
+            $requestImage->move('img/events', $imageName);
+
+            // * This will save the file in the database.
+            $request['image'] = $imageName; // We update the image name in the request, so that it can be saved in the database.
+        }
+
+        $event->save();
+
+        return redirect('/dashboard')->with('msg', 'Evento atualizado com sucesso!');
+    }
+
+
+
+
+
+
+
+
+
+
+ex:
+
+
+
+
+
+
+
+
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $eventId)
+    {
+
+        $event = Event::findOrFail($eventId);
+
+        // Check if the user is the owner of the event:
+        if (Auth::user()->id != $event->user_id) {
+            return redirect('/')->with('msg', 'Você não pode editar este evento!');
+        }
+
+        $event->title = $request->title;
+        $event->date = $request->date;
+        $event->city = $request->city;
+        $event->description = $request->description;
+        $event->is_private = $request->is_private;
+        $event->items = $request->items;
+
+        // * Image Upload
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+
+            $requestImage = $request->image;
+
+            // $requestImage->store('public/img/events'); // * This is the easy way to do it, but we want to have unique names for each img file.
+
+            $extension = $requestImage->extension();
+
+            // * This name is used for storing it in the database, and also for saving in a folder.
+            $imageName = md5($requestImage->getClientOriginalName() . strtotime("now")) . "." . $extension;
+
+            // * This will save the file in the folder.
+            $requestImage->move('img/events', $imageName);
+
+            // * This will save the file in the database.
+            $request['image'] = $imageName; // We update the image name in the request, so that it can be saved in the database.
+        }
+
+        $event->save();
+
+        return redirect('/dashboard')->with('msg', 'Evento atualizado com sucesso!');
+    }
+
+
+
+
+
+
+testamos, e funciona...

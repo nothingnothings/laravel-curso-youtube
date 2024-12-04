@@ -50,12 +50,12 @@ Route::get('/', function () {
     return view('welcome', ['events' => $events, 'search' => $search]);
 });
 
-Route::get('/eventos', [EventController::class, 'index']);
 Route::get('/eventos/criar', [EventController::class, 'create'])->middleware('auth');
 Route::get('/eventos/{id}', [EventController::class, 'show']);
-Route::get('/eventos/{id}/editar', [EventController::class, 'edit']);
+Route::get('/eventos/{id}/editar', [EventController::class, 'edit'])->middleware('auth'); // * This route is used to edit an event.
+Route::put('/eventos/{id}', [EventController::class, 'update'])->middleware('auth'); // * This route is used to update an event.
 Route::post('/eventos', [EventController::class, 'store']);
-Route::put('/eventos/{id}', [EventController::class, 'update']);
-Route::delete('/eventos/{id}', [EventController::class, 'destroy']);
+
+Route::delete('/eventos/{id}', [EventController::class, 'destroy'])->middleware('auth');
 
 Route::get('/dashboard', [EventController::class, 'dashboard'])->middleware('auth');
