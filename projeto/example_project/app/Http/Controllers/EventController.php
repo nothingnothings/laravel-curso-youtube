@@ -34,10 +34,11 @@ class EventController extends Controller
     {
         $event = new Event();
         $event->title = $request->title;
+        $event->date = $request->date; // Check model for more details (protected $dates = ['date']);
         $event->city = $request->city;
         $event->description = $request->description;
         $event->is_private = $request->is_private;
-        $event->items = $request->items;
+        $event->items = $request->items; // Check model for more details (protected $casts = ['items' => 'array'];);
 
 
         // * Image Upload

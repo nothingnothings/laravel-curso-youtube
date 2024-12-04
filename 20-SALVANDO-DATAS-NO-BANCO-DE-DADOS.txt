@@ -1,0 +1,568 @@
+
+
+
+
+
+SALVANDO DATAS...
+
+
+
+
+
+
+
+
+
+-> PARA SALVAR DATAS NO LARAVEL É MUITO SIMPLES,
+PRECISAMOS DE UM INPUT DO TIPO __ DATE__, 
+
+NA NOSSA VIEW...
+
+
+
+
+
+
+-> UM CAMPO DE 'dateTime',
+    via MIGRATIONS...
+
+
+
+
+
+
+--> E PRECISAMOS PROCESSAR O ENVIO DOS DADOS VIA CONTROLLER,
+PELO REQUEST DE TIPO 'POST'...
+
+
+
+
+
+
+
+
+
+VAMOS SALVAR O DIA DE REALIZAÇÃO DOS EVENTOS...
+
+
+
+
+
+
+
+
+
+
+
+
+-> PARA ISSO, PRECISAMOS CRIAR 1 MIGRATION,...
+
+
+
+
+
+
+--> CRIAMOS TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+
+php artisan make:migration add_date_to_events_table
+
+
+
+
+
+
+
+
+
+
+CERTO... ISSO VAI CRIAR A MIGRATION,
+
+AÍ ESCREVEMOS ASSIM:
+
+
+
+
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('events', function (Blueprint $table) {
+            $table->dateTime('date');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('events', function (Blueprint $table) {
+            $table->dropColumn('date');
+        });
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+
+DEPOIS DISSO, RODAMOS 'php artisan migrate:fresh',
+
+
+PARA COMEÇARMOS DO 0...
+
+
+
+
+
+
+
+
+ISSO VAI APAGAR O BANCO TODO, MAS VAMOS RESETTAR TUDO DE FORMA CORRETA,
+
+FICAR COM TODAS AS TABLES COM AS COLUMNS CORRETAS, ETC...
+
+
+
+
+
+
+
+
+
+
+
+-> DEPOIS DISSO, TEMOS OUTRO DETALHE:
+
+
+''PRECISAMOS INFORMAR, AO LARAVEL,
+    QUE TEREMOS 1 CAMPO DE 
+
+    TIPO 'date''....
+
+
+
+
+
+
+
+
+
+
+
+-> PARA ISSO, 
+
+
+DEVEMOS USAR A PROPERTY 
+
+
+'protected $dates = ',
+
+
+LÁ NO MODEL DE 'events',
+
+
+E AÍ 
+
+DEVEMOS ADICIONAR O nome do nosso field, 'date'...
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Event extends Model
+{
+    // * This wil get saved as '[ "Cadeiras", "Palco", "Cerveja Grátis", "Open Food" ]' in the database, in the 'items' field.
+    protected $casts = ['items' => 'array']; // Make it so that items, which are sent as strings by the frontend, are saved as an array in the database.
+
+    protected $dates = ['date']; // This will make it so that fields passed to the 'date' field are considered as 'dateTime' data type...
+}
+
+
+
+
+
+
+
+
+
+
+
+
+E ISSO VAI FACILITAR BASTANTE NOSSA VIDA...
+
+
+
+
+
+
+
+
+
+
+
+-> LÁ NO FORMULÁRIO,
+
+
+
+ADICIONAMOS O FIELD ASSIM:
+
+
+
+
+
+
+        <div class="form-group">
+            <label for="title">Data do Evento:</label>
+            <input type="date" class="form-control" id="date" name="date">
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+--> VAMOS COLOCAR TAMBÉM UM FALLBACK 
+
+
+PARA QUANDO 'NÃO HÁ EVENTOS'...
+
+
+
+
+
+
+
+
+
+-> PARA ISSO, BASTA COLOCAR UM @if 
+
+
+no welcome.blade.php,
+
+
+PARA TER ALGO ASSIM:
+
+
+
+
+
+        @if(count($events) == 0)
+        <div class="col-md-12">
+            <h2>Não há eventos disponíveis</h2>
+        </div>
+        @endif
+
+
+
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+@extends('layouts.main')
+
+@section('title', 'HDC Events')
+
+@section('content')
+
+<div id="search-container" class="col-md-12">
+    <h1>Busque um evento</h1>
+    <form action="/">
+        <input type="text" id="search" name="search" class="form-control" placeholder="Procurar...">
+    </form>
+</div>
+
+<div id="events-container" class="col-md-12">
+    <h2>Próximos Eventos</h2>
+    <p>Veja os eventos dos próximos dias:</p>
+    <div id="cards-container" class="row">
+        @foreach($events as $event)
+        <div class="col-md-3">
+            <div class="card col-md-3">
+                <img src="/img/events/{{ $event->image }}" alt="Evento">
+                <div class="card-body">
+                    <p class="card-date">{{ $event->date }}</p>
+                    <h5 class="card-title">{{ $event->title }}</h5>
+                    <p class="card-participants">X Participantes</p>
+                    <a href="/eventos/{{ $event->id }}" class="btn btn-primary">Saber Mais</a>
+                </div>
+            </div>
+        </div>
+        @endforeach
+        @if(count($events) == 0)
+        <div class="col-md-12">
+            <h2>Não há eventos disponíveis</h2>
+        </div>
+        @endif
+    </div>
+
+    @endsection
+
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+NO CRIAR EVENTOS, JÁ FICAMOS COM O INPUT NOVO, DE DATES...
+
+
+
+
+
+
+
+
+A PARTE DO FRONT ESTÁ CORRETA...
+
+
+
+
+
+
+
+
+
+-> NO CONTROLLER, PRECISAMOS BASICAMENTE 
+
+ADICIONAR 
+
+
+'$event->date = $request->date';
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $event = new Event();
+        $event->title = $request->title;
+        $event->date = $request->date; // Check model for more details (protected $dates = ['date']);
+        $event->city = $request->city;
+        $event->description = $request->description;
+        $event->is_private = $request->is_private;
+        $event->items = $request->items; // Check model for more details (protected $casts = ['items' => 'array'];);
+
+
+        // * Image Upload
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+
+            $requestImage = $request->image;
+
+            // $requestImage->store('public/img/events'); // * This is the easy way to do it, but we want to have unique names for each img file.
+
+            $extension = $requestImage->extension();
+
+            // * This name is used for storing it in the database, and also for saving in a folder.
+            $imageName = md5($requestImage->getClientOriginalName() . strtotime("now")) . "." . $extension;
+
+            // * This will save the file in the folder.
+            $requestImage->move('img/events', $imageName);
+
+            // * This will save the file in the database.
+            $event->image = $imageName;
+        }
+
+        $event->save();
+
+        return redirect('/')->with('msg', 'Event created successfully!'); // We redirect, and also FLASH A MESSAGE TO THE USER. This message is acessed with '@session', in the blade files.
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+CERTO....
+
+
+
+
+
+
+
+
+AGORA SÓ FALTA DISPLAYAR A DATE CORRETAMENTE, LÁ NO FRONTEND...
+
+
+
+
+
+
+
+-> OS DADOS FORAM SALVOS COMO 1 TIMESTAMP...
+
+
+
+DATETIME...
+
+
+
+
+
+
+-> MAS PODEMOS CONVERTER FACILMENTE ESSA DATE PARA O FORMATO BRASILEIRO,
+
+    COM FUNCTIONS PHP...
+
+
+
+
+
+    -> PODEMOS FAZER ISSO ASSIM,
+
+
+    NO BLADE:
+
+
+
+
+
+
+                    <p class="card-date">{{ date('d/m/Y', strtotime($event->date)) }}</p>
+
+
+
+
+
+
+
+CERTO...
+
+
+
+com isso, nossas dates serão exibidas corretamente, no frontend...
