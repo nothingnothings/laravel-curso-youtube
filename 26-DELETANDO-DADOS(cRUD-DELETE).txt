@@ -1,0 +1,498 @@
+
+
+
+
+
+
+
+
+DELETANDO EVENTOS:
+
+
+
+
+
+
+
+-> VAMOS AGORA DELETAR 1 EVENTO...
+
+
+
+
+
+
+-> UTILIZAREMOS UMA NOVA ROTA PARA ISSO...
+
+
+
+
+
+-> OUTRO VERBO HTTP TAMBÉM SERÁ PRECISO: DELETE..
+
+
+
+
+
+
+
+-> E AINDA FAREMOS A LÓGICA, NO NOSSO CONTROLLER, 
+
+PARA ESSA ALTERAÇÃO PERSISTIR NO BANCO DE DADOS... 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+O FRONT ESTÁ ASSIM:
+
+
+
+
+
+
+                <form action="/eventos/{{ $event->id }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger">Excluir</button>
+                    </form>
+
+
+
+
+
+
+
+
+
+
+
+O BACKEND:
+
+
+
+
+
+
+Route::delete('/eventos/{id}', [EventController::class, 'destroy']);
+
+
+
+
+
+e assIM:
+
+
+
+
+
+
+
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Event;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class EventController extends Controller
+{
+    ...
+
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Event $event)
+    {
+        //
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+PRECISAMOS 
+
+
+DEIXAR O USER DELETAR 
+
+
+ESSE EVENT...
+
+
+
+
+
+
+
+
+
+
+
+-> VAMOS ATÉ O EVENTCONTROLLER...
+
+
+
+
+
+
+
+
+O PROFESSOR CRIA A ROUTE..
+
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+Route::delete('/eventos/{id}', [EventController::class, 'destroy']);
+
+
+
+
+
+
+
+
+
+
+
+
+DENTRO DO METHOD, ESCREVEMOS ASSIM:
+
+
+
+
+
+
+
+
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+    }
+
+
+
+
+
+
+
+
+
+
+
+-> AÍ TENTAMOS ENCONTRAR ESSE EVENT E DELETÁ-LO...
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        Event::findOrFail($id)->delete();
+
+        return redirect('/dashboard')->with('msg', 'Evento excluído com sucesso!');
+    }
+
+
+
+
+
+
+
+
+VAMOS REDIRECIONAR COM UMA FLASH MESSAGE,
+
+
+
+
+de 'Evento excluído com sucesso'...
+
+
+
+
+
+O CONTROLLER ESTÁ PRONTO...
+
+
+
+
+
+
+
+AGORA TEMOS QUE MEXER NO EVENT, NO FRONTEND...
+
+
+
+
+
+
+TIPO ASSIM:
+
+
+
+
+
+
+
+
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Participantes</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($events as $event)
+            <tr>
+                <td scope="row">{{ $loop->index + 1 }}</td>
+                <td>{{ $event->title }}</td>
+                <td>{{ $event->participants }}</td>
+                <td>
+                    <a href="/eventos/{{ $event->id }}/editar" class="btn btn-primary">Editar</a>
+                    <form action="/eventos/{{ $event->id }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
+
+
+
+    --> O DELETE SERÁ FEITO DENTRO DAQUELA FORM...
+
+
+
+
+
+MAS COLOCAMOS TAMBÉM UNS ÍCONES, TIPO ASSIm:
+
+
+
+
+
+
+
+
+
+
+                <td>
+                    <a href="/eventos/{{ $event->id }}/editar" class="btn btn-info edit-btn">
+                        <ion-icon name="create-outline"></ion-icon> Editar
+                    </a>
+                    <form action="/eventos/{{ $event->id }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger">Excluir</button>
+                    </form>
+                </td>
+
+
+            
+
+        
+
+
+    
+    precisamos de um icon para o delete, também...
+
+
+
+
+
+
+
+e temos um problema, com o delete:
+
+
+
+
+
+
+       <form action="/eventos/{{ $event->id }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger">Excluir</button>
+                    </form>
+
+
+
+
+
+
+
+
+
+        -> FALTOU A DIRECTIVE DE '@method('DELETE')',
+
+
+        PARA INDICAR AO LARAVEL QUE ESSA __ SERÁ UMA ACTION DE DELETE, E NÃO 
+
+        DE 'POST'...
+
+
+
+
+
+
+
+
+
+
+EX:
+
+
+
+
+
+
+
+
+
+                <td>
+                    <a href="/eventos/{{ $event->id }}/editar" class="btn btn-info edit-btn">
+                        <ion-icon name="create-outline"></ion-icon> Editar
+                    </a>
+                    <form action="/eventos/{{ $event->id }}" method="POST">
+                        @csrf
+                        @method('DELETE') {{-- WE DO THIS TO TELL LARAVEL THAT THIS IS A DELETE REQUEST, AND NOT A POST --}}
+                        <input type="hidden" name="_method">
+                        <button type="submit" class="btn btn-danger delete-btn">
+                            <ion-icon name="trash-outline"></ion-icon> Deletar
+                        </button>
+                    </form>
+                </td>
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+AÍ NÓS SOMOS REDIRECIONADOS à dashboard,
+
+com aquela flash message de 'O usuário foi deletado com sucesso'...
+
+
+
+
+
+mais 1 estilo css:
+
+
+
+
+
+
+.dashboard-events-container form {
+    display: inline-block;
+}
+
+
+
+
+
+
+
+
+
+CERTO...
+
+
+
+
+
+
+
+
+
+
+
+--> NÓS:
+
+
+1) CRIAMOS UMA ROUTE DE DELETE, COM O method findOrFail e -> delete() 
+
+
+2) REDIRECIONAMOS PARA A DASHBOARD, COM 1 FLASH MESSAGE...
+
+
+
+3) CRIAMOS O FRONTEND PARA O DELETE, COM '@csrf' e '@method('DELETE')'
+

@@ -26,11 +26,16 @@
                 <td>{{ $event->title }}</td>
                 <td>{{ $event->participants }}</td>
                 <td>
-                    <a href="/eventos/{{ $event->id }}/editar" class="btn btn-primary">Editar</a>
+                    <a href="/eventos/{{ $event->id }}/editar" class="btn btn-info edit-btn">
+                        <ion-icon name="create-outline"></ion-icon> Editar
+                    </a>
                     <form action="/eventos/{{ $event->id }}" method="POST">
                         @csrf
-                        <input type="hidden" name="_method" value="DELETE">
-                        <button type="submit" class="btn btn-danger">Excluir</button>
+                        @method('DELETE') {{-- WE DO THIS TO TELL LARAVEL THAT THIS IS A DELETE REQUEST, AND NOT A POST --}}
+                        <input type="hidden" name="_method">
+                        <button type="submit" class="btn btn-danger delete-btn">
+                            <ion-icon name="trash-outline"></ion-icon> Deletar
+                        </button>
                     </form>
                 </td>
             </tr>
